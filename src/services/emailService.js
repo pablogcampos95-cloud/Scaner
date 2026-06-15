@@ -11,7 +11,10 @@ export async function sendEvaluationInvitation({ asignacion, evaluado }) {
       body: { asignacion_id: asignacion.id },
     });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      const contextMessage = error.context?.error || error.context?.details?.message || error.context?.message;
+      throw new Error(contextMessage || error.message);
+    }
     if (data?.error) throw new Error(data.error);
 
     return {

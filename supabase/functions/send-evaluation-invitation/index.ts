@@ -184,7 +184,13 @@ Deno.serve(async (request) => {
     });
 
     if (!resendResponse.ok) {
-      return jsonResponse({ error: 'Resend no pudo enviar el correo.', details: resendData }, 502);
+      return jsonResponse(
+        {
+          error: resendData?.message || 'Resend no pudo enviar el correo.',
+          details: resendData,
+        },
+        502,
+      );
     }
 
     await supabaseRequest(`/rest/v1/asignaciones?id=eq.${encodeURIComponent(assignment.id)}`, {
