@@ -1,0 +1,176 @@
+.metrics-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-height: 118px;
+  padding: 18px;
+}
+
+.metric-card span,
+.metric-card small {
+  color: var(--muted);
+}
+
+.metric-card strong {
+  color: var(--navy);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.metric-card--success {
+  border-left: 5px solid var(--success);
+}
+
+.metric-card--warning {
+  border-left: 5px solid var(--warning);
+}
+
+.metric-card--danger {
+  border-left: 5px solid var(--danger);
+}
+
+.filters-bar {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.filters-bar input,
+.filters-bar select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.table-shell {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.data-table {
+  border-collapse: collapse;
+  min-width: 900px;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.data-table th {
+  background: #eef3f8;
+  color: var(--navy);
+  font-size: 13px;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.empty-table {
+  color: var(--muted);
+  text-align: center;
+}
+
+.badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 26px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.status--completada,
+.result--apto {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status--en_proceso,
+.status--asignada,
+.status--enviada,
+.status--pendiente,
+.result--apto_con_refuerzo,
+.result--sin_resultado {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.status--vencida,
+.result--no_apto_temporal {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.table-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.table-actions button {
+  background: transparent;
+  border: 0;
+  color: var(--blue);
+  font-weight: 800;
+  padding: 0;
+}
+
+.detail-page {
+  max-width: 1000px;
+}
+
+.result-summary,
+.module-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.result-summary > div,
+.module-score,
+.plain-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.result-summary span,
+.module-score span,
+.module-score small {
+  color: var(--muted);
+  display: block;
+}
+
+.result-summary strong,
+.module-score strong {
+  color: var(--navy);
+  display: block;
+  font-size: 28px;
+  margin: 8px 0;
+}
+
+.plain-section h2 {
+  color: var(--navy);
+  font-size: 18px;
+  margin-bottom: 8px;
+}

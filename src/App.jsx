@@ -1,0 +1,45 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import Layout from './components/Layout.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import RoleRoute from './components/RoleRoute.jsx';
+import AssignEvaluation from './pages/AssignEvaluation.jsx';
+import DashboardAdmin from './pages/DashboardAdmin.jsx';
+import DashboardSupervisor from './pages/DashboardSupervisor.jsx';
+import Evaluados from './pages/Evaluados.jsx';
+import EvaluationCompleted from './pages/EvaluationCompleted.jsx';
+import EvaluationPublic from './pages/EvaluationPublic.jsx';
+import Login from './pages/Login.jsx';
+import NotFound from './pages/NotFound.jsx';
+import RegisterEvaluado from './pages/RegisterEvaluado.jsx';
+import Results from './pages/Results.jsx';
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/evaluacion/:token" element={<EvaluationPublic />} />
+      <Route path="/evaluacion-completada" element={<EvaluationCompleted />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<Layout />}>
+          <Route element={<RoleRoute allowedRoles={['admin']} />}>
+            <Route path="/admin" element={<DashboardAdmin />} />
+          </Route>
+
+          <Route element={<RoleRoute allowedRoles={['supervisor']} />}>
+            <Route path="/supervisor" element={<DashboardSupervisor />} />
+            <Route path="/registrar-evaluado" element={<RegisterEvaluado />} />
+            <Route path="/asignar-evaluacion" element={<AssignEvaluation />} />
+          </Route>
+
+          <Route path="/evaluados" element={<Evaluados />} />
+          <Route path="/resultados" element={<Results />} />
+          <Route path="/resultados/:id" element={<Results />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}

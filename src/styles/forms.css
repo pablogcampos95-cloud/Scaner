@@ -1,0 +1,122 @@
+.login-page {
+  background:
+    linear-gradient(90deg, rgba(16, 35, 63, 0.94), rgba(31, 95, 153, 0.86)),
+    url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80");
+  background-position: center;
+  background-size: cover;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.login-panel {
+  align-items: center;
+  display: grid;
+  gap: 40px;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
+  max-width: 1120px;
+  width: 100%;
+}
+
+.login-copy {
+  color: #fff;
+}
+
+.login-copy .eyebrow {
+  color: #a9d4ff;
+}
+
+.login-copy h1 {
+  font-size: 44px;
+  line-height: 1.08;
+  margin-bottom: 18px;
+  max-width: 760px;
+}
+
+.login-copy p {
+  color: #e8f2ff;
+  font-size: 18px;
+  max-width: 620px;
+}
+
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.form-title {
+  align-items: center;
+  color: var(--navy);
+  display: flex;
+  gap: 10px;
+}
+
+.form-title h2 {
+  margin: 0;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+label {
+  color: var(--navy);
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+input,
+select,
+textarea {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.field-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.demo-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.check-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.check-row input {
+  min-height: auto;
+  width: 18px;
+}
+
+@media (max-width: 860px) {
+  .login-panel,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .login-copy h1 {
+    font-size: 32px;
+  }
+}
