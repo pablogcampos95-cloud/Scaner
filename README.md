@@ -51,11 +51,33 @@ values
 
 ## Fase 2 pendiente
 
-- Envío real de correos con Resend, SendGrid o Supabase Edge Function.
 - Generación de informes PDF.
 - Edición dinámica de preguntas desde Supabase.
 - Reportes avanzados y exportaciones controladas.
 - RPC o Edge Function pública para endurecer el acceso por token sin exponer políticas anon amplias.
+
+## Correos con Resend
+
+El envío real se realiza con la Supabase Edge Function `send-evaluation-invitation`.
+
+Configura estos secretos en Supabase:
+
+```bash
+RESEND_API_KEY=tu_api_key_de_resend
+APP_URL=https://scaner-production.up.railway.app
+FROM_EMAIL=Evaluaciones <onboarding@resend.dev>
+```
+
+Para producción, valida un dominio propio en Resend y cambia `FROM_EMAIL` por un remitente de ese dominio.
+
+Despliegue con Supabase CLI:
+
+```bash
+supabase functions deploy send-evaluation-invitation --no-verify-jwt
+supabase secrets set RESEND_API_KEY=tu_api_key_de_resend
+supabase secrets set APP_URL=https://scaner-production.up.railway.app
+supabase secrets set FROM_EMAIL="Evaluaciones <onboarding@resend.dev>"
+```
 
 ## Subir a GitHub
 

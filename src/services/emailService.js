@@ -6,6 +6,22 @@ import { isSupabaseConfigured, supabase } from './supabaseClient.js';
 export async function sendEvaluationInvitation({ asignacion, evaluado }) {
   const publicUrl = `${window.location.origin}/evaluacion/${asignacion.token_unico}`;
 
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.functions.invoke('send-evaluation-invitation', {
+      body: { asignacion_id: asignacion.id },
+    });
+
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+
+    return {
+      sent: true,
+      simulated: false,
+      publicUrl: data.publicUrl || publicUrl,
+      message: data.message || 'Invitación enviada correctamente.',
+    };
+  }
+
   const payload = {
     asignacion_id: asignacion.id,
     destinatario: evaluado.correo,
@@ -15,12 +31,7 @@ export async function sendEvaluationInvitation({ asignacion, evaluado }) {
     error: null,
   };
 
-  if (isSupabaseConfigured) {
-    const { error } = await supabase.from('correos_enviados').insert(payload);
-    if (error) throw new Error(error.message);
-  } else {
-    insertLocal('correos_enviados', payload);
-  }
+  insertLocal('correos_enviados', payload);
 
   await updateAsignacion(asignacion.id, { estado: ASSIGNMENT_STATUS.ENVIADA });
 
