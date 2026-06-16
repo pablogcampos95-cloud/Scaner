@@ -3,6 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
+import { generateResultSuggestion } from '../services/aiService.js';
 import { getResponsesByAsignacion } from '../services/respuestasService.js';
 import { getResultadoById, listResultados } from '../services/resultadosService.js';
 import { getAudioSignedUrl } from '../services/storageService.js';
@@ -13,7 +14,7 @@ import { getLevelByScore } from '../utils/scoreCalculator.js';
 export default function Results() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '' });
+  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiError: '' });
 
   useEffect(() => {
     const loader = id
@@ -28,9 +29,28 @@ export default function Results() {
       : listResultados(profile).then((rows) => ({ rows, selected: null, responses: [] }));
 
     loader
-      .then((payload) => setState({ ...payload, loading: false, error: '' }))
-      .catch((error) => setState({ rows: [], selected: null, loading: false, error: error.message }));
+      .then((payload) => setState({ ...payload, loading: false, error: '', aiLoading: false, aiError: '' }))
+      .catch((error) => setState({ rows: [], selected: null, responses: [], loading: false, error: error.message, aiLoading: false, aiError: '' }));
   }, [id, profile]);
+
+  const handleGenerateSuggestion = async (force = false) => {
+    if (!state.selected?.id) return;
+    setState((prev) => ({ ...prev, aiLoading: true, aiError: '' }));
+    try {
+      const response = await generateResultSuggestion(state.selected.id, force);
+      setState((prev) => ({
+        ...prev,
+        aiLoading: false,
+        selected: {
+          ...prev.selected,
+          ai_suggestion: response.suggestion,
+          ai_suggestion_generated_at: new Date().toISOString(),
+        },
+      }));
+    } catch (error) {
+      setState((prev) => ({ ...prev, aiLoading: false, aiError: error.message }));
+    }
+  };
 
   if (id && !state.loading) {
     if (!state.selected) {
@@ -81,6 +101,14 @@ export default function Results() {
           <p>{result.diagnostico}</p>
           <h2>Recomendación de capacitación</h2>
           <p>{result.recomendacion}</p>
+          <div className="ai-suggestion-box">
+            <span className="eyebrow">Sugerencia IA</span>
+            {result.ai_suggestion ? <p>{result.ai_suggestion}</p> : <p className="demo-note">Genera una sugerencia breve con IA para complementar el resultado.</p>}
+            {state.aiError ? <p className="alert error">{state.aiError}</p> : null}
+            <button className="secondary-button compact" type="button" onClick={() => handleGenerateSuggestion(Boolean(result.ai_suggestion))} disabled={state.aiLoading}>
+              {state.aiLoading ? 'Generando...' : result.ai_suggestion ? 'Regenerar sugerencia IA' : 'Generar sugerencia IA'}
+            </button>
+          </div>
           {state.responses.some((response) => response.requires_review) ? (
             <Link className="primary-button compact" to={`/resultados/${result.asignacion_id}/revision`}>
               Revisar respuestas pendientes

@@ -118,6 +118,8 @@ alter table public.resultados add column if not exists estado_resultado text def
 alter table public.resultados add column if not exists score_obtained numeric default 0;
 alter table public.resultados add column if not exists max_score numeric default 0;
 alter table public.resultados add column if not exists pending_reviews integer default 0;
+alter table public.resultados add column if not exists ai_suggestion text;
+alter table public.resultados add column if not exists ai_suggestion_generated_at timestamp with time zone;
 
 create table if not exists public.evaluation_sections (
   id uuid primary key default gen_random_uuid(),

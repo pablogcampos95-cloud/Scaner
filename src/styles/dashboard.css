@@ -238,6 +238,21 @@
   color: var(--text-muted);
 }
 
+.ai-suggestion-box {
+  background: rgba(0, 200, 255, 0.08);
+  border: 1px solid rgba(0, 200, 255, 0.22);
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 16px;
+}
+
+.ai-suggestion-box p {
+  color: var(--text-main);
+  margin: 0;
+}
+
 .matrix-shell {
   background: rgba(16, 33, 63, 0.76);
   border: 1px solid rgba(30, 78, 120, 0.88);
