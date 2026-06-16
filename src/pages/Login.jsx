@@ -60,7 +60,9 @@ export default function Login() {
         <form className="form-card login-form" onSubmit={handleSubmit}>
           <Logo size="md" showText={false} className="login-form-logo" />
           <div className="form-title centered">
-            <LockKeyhole size={22} />
+            <span className="login-title-icon" aria-hidden="true">
+              <LockKeyhole size={22} />
+            </span>
             <div>
               <h2>Iniciar sesión</h2>
               <p>Acceso para administradores y supervisores</p>
@@ -80,9 +82,9 @@ export default function Login() {
           <button className="primary-button" type="submit" disabled={status.submitting}>
             {status.submitting ? 'Validando...' : 'Iniciar sesión'}
           </button>
-          <p className="demo-note">
+          <p className="demo-note login-note">
             {isSupabaseConfigured
-              ? 'Accede con tus credenciales autorizadas.'
+              ? 'inicia tu experiencia de evaluación con IA'
               : 'Modo local: admin@demo.com o supervisor@demo.com con cualquier contraseña.'}
           </p>
         </form>

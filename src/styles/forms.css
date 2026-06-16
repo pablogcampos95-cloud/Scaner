@@ -66,7 +66,8 @@
     linear-gradient(180deg, rgba(16, 33, 63, 0.84), rgba(7, 26, 51, 0.88));
   border-color: rgba(0, 200, 255, 0.42);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.36), 0 0 36px rgba(0, 200, 255, 0.12);
-  padding: 30px;
+  gap: 20px;
+  padding: 36px 34px;
 }
 
 .login-form-logo {
@@ -81,8 +82,24 @@
 }
 
 .form-title.centered {
+  align-items: center;
+  display: grid;
+  gap: 10px;
   justify-content: center;
+  justify-items: center;
   text-align: center;
+}
+
+.login-title-icon {
+  align-items: center;
+  background: rgba(0, 200, 255, 0.1);
+  border: 1px solid rgba(0, 200, 255, 0.24);
+  border-radius: 14px;
+  color: var(--text-main);
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
 }
 
 .form-title h2 {
@@ -139,6 +156,12 @@ textarea {
   color: var(--text-muted);
   font-size: 13px;
   margin-bottom: 0;
+}
+
+.login-note {
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .check-row {
