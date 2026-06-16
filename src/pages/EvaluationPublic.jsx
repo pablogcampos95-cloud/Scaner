@@ -198,10 +198,10 @@ export default function EvaluationPublic() {
                 <h2>{currentModule.label}</h2>
               </div>
               {currentModule.questions.map((question, index) => (
-                <fieldset className="question-card" key={question.id}>
-                  <legend>
+                <article className="question-card" key={question.id}>
+                  <h3 className="question-title">
                     {index + 1}. {getQuestionTitle(question)}
-                  </legend>
+                  </h3>
                   {question.descripcion ? <p className="question-description">{question.descripcion}</p> : null}
                   {question.instrucciones ? <p className="question-instructions">{question.instrucciones}</p> : null}
                   {hasDynamicQuestions ? (
@@ -220,7 +220,7 @@ export default function EvaluationPublic() {
                       </label>
                     ))
                   )}
-                </fieldset>
+                </article>
               ))}
             </section>
 

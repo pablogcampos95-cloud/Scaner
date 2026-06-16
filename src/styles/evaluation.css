@@ -143,15 +143,21 @@
   border: 1px solid rgba(30, 78, 120, 0.82);
   border-radius: 16px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
-  padding: 18px;
+  overflow: hidden;
+  padding: 20px;
+  width: 100%;
 }
 
-.question-card legend {
+.question-title {
   color: var(--text-main);
+  font-size: 18px;
   font-weight: 900;
-  padding: 0 6px;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .question-description,
@@ -200,6 +206,7 @@
 .audio-recorder {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .audio-controls {
@@ -214,6 +221,8 @@
 }
 
 .audio-recorder audio {
+  display: block;
+  max-width: 100%;
   width: 100%;
 }
 
