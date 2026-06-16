@@ -87,6 +87,10 @@ export default function EvaluationPublic() {
     setAnswers({ ...answers, [questionId]: option });
   };
 
+  const getQuestionTitle = (question) => {
+    return question.titulo || question.question || question.title || 'Pregunta sin título';
+  };
+
   const finishEvaluation = async () => {
     if (Object.keys(answers).length !== totalQuestions) {
       setState((prev) => ({ ...prev, error: 'Responde todas las preguntas antes de finalizar.' }));
@@ -196,8 +200,10 @@ export default function EvaluationPublic() {
               {currentModule.questions.map((question, index) => (
                 <fieldset className="question-card" key={question.id}>
                   <legend>
-                    {index + 1}. {question.question}
+                    {index + 1}. {getQuestionTitle(question)}
                   </legend>
+                  {question.descripcion ? <p className="question-description">{question.descripcion}</p> : null}
+                  {question.instrucciones ? <p className="question-instructions">{question.instrucciones}</p> : null}
                   {hasDynamicQuestions ? (
                     <QuestionRenderer question={question} value={answers[question.id]} onChange={(value) => handleAnswer(question.id, value)} />
                   ) : (

@@ -154,6 +154,24 @@
   padding: 0 6px;
 }
 
+.question-description,
+.question-instructions {
+  border-radius: 12px;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.question-description {
+  color: var(--text-muted);
+}
+
+.question-instructions {
+  background: rgba(0, 200, 255, 0.08);
+  border: 1px solid rgba(0, 200, 255, 0.18);
+  color: #d7f4ff;
+  font-weight: 700;
+}
+
 .option-row {
   align-items: center;
   background: rgba(16, 33, 63, 0.82);
