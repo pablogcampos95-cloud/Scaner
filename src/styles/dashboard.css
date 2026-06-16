@@ -29,6 +29,20 @@
   max-width: 760px;
 }
 
+.result-hero {
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+}
+
+.result-hero-logo {
+  align-self: center;
+  justify-self: center;
+}
+
+.result-hero-logo img {
+  height: 118px;
+  width: 118px;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -228,5 +242,14 @@
   .dashboard-hero,
   .result-hero {
     grid-template-columns: 1fr;
+  }
+
+  .result-hero-logo {
+    justify-self: start;
+  }
+
+  .result-hero-logo img {
+    height: 96px;
+    width: 96px;
   }
 }

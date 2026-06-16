@@ -46,7 +46,7 @@ export default function Results() {
     return (
       <section className="page-stack detail-page">
         <div className="result-hero">
-          <Logo size="sm" showText={false} />
+          <Logo size="lg" showText={false} className="result-hero-logo" />
           <div>
             <span className="eyebrow">Informe individual</span>
             <h1>{result.evaluados?.nombre_completo || 'Evaluado'}</h1>
