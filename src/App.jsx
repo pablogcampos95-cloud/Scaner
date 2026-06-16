@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import RoleRoute from './components/RoleRoute.jsx';
 import AssignEvaluation from './pages/AssignEvaluation.jsx';
 import AdminEvaluations from './pages/AdminEvaluations.jsx';
+import AdminUsers from './pages/AdminUsers.jsx';
 import DashboardAdmin from './pages/DashboardAdmin.jsx';
 import DashboardSupervisor from './pages/DashboardSupervisor.jsx';
 import Evaluados from './pages/Evaluados.jsx';
@@ -27,6 +28,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route element={<RoleRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<DashboardAdmin />} />
+            <Route path="/admin/usuarios" element={<AdminUsers />} />
             <Route path="/admin/evaluaciones" element={<AdminEvaluations />} />
             <Route path="/admin/evaluaciones/nueva" element={<AdminEvaluations mode="new" />} />
             <Route path="/admin/evaluaciones/:id/editar" element={<AdminEvaluations mode="edit" />} />
