@@ -5,7 +5,7 @@ export async function listResultados(profile) {
   if (isSupabaseConfigured) {
     let query = supabase
       .from('resultados')
-      .select('*, evaluados(*), asignaciones(*)')
+      .select('*, evaluados(*, areas(*), perfiles_operativos(*)), asignaciones(*)')
       .order('created_at', { ascending: false });
     if (profile?.role === 'supervisor') query = query.eq('supervisor_id', profile.id);
     const { data, error } = await query;
@@ -14,14 +14,25 @@ export async function listResultados(profile) {
   }
 
   const evaluados = listLocal('evaluados');
+  const areas = listLocal('areas');
+  const perfiles = listLocal('perfiles_operativos');
   const asignaciones = listLocal('asignaciones');
   return listLocal('resultados')
     .filter((row) => profile?.role !== 'supervisor' || row.supervisor_id === profile.id)
     .map((row) => ({
       ...row,
-      evaluados: evaluados.find((item) => item.id === row.evaluado_id),
+      evaluados: decorateEvaluado(evaluados.find((item) => item.id === row.evaluado_id), areas, perfiles),
       asignaciones: asignaciones.find((item) => item.id === row.asignacion_id),
     }));
+}
+
+function decorateEvaluado(evaluado, areas, perfiles) {
+  if (!evaluado) return evaluado;
+  return {
+    ...evaluado,
+    areas: areas.find((area) => area.id === evaluado.area_id),
+    perfiles_operativos: perfiles.find((perfil) => perfil.id === evaluado.perfil_operativo_id),
+  };
 }
 
 export async function getResultadoById(id, profile) {

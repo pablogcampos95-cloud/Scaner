@@ -41,13 +41,13 @@ async function supabaseRequest(path: string, options: RequestInit = {}) {
 async function getRequester(authorization: string | null) {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-  if (!authorization || !supabaseUrl || !anonKey) throw new Error('Sesión no válida.');
+  if (!authorization || !supabaseUrl || !anonKey) throw new Error('Sesion no valida.');
 
   const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: { apikey: anonKey, Authorization: authorization },
   });
   const data = await response.json();
-  if (!response.ok || !data?.id) throw new Error('Sesión no válida.');
+  if (!response.ok || !data?.id) throw new Error('Sesion no valida.');
   return data;
 }
 
@@ -60,16 +60,20 @@ function getOutputText(response: any) {
 function fallbackSuggestion(result: any) {
   const average = Number(result.promedio_general || 0);
   if (result.estado_resultado === 'pendiente_revision') {
-    return 'Sugerencia IA: revisar primero las respuestas manuales pendientes y luego definir un refuerzo puntual según los criterios con menor desempeño.';
+    return 'Avanzar con revision: hay respuestas manuales pendientes antes de decidir.\nRevisar evidencia y confirmar ajuste al perfil postulado.';
   }
-  if (average >= 80) return 'Sugerencia IA: el evaluado muestra un desempeño sólido; conviene iniciar operación con seguimiento ligero durante las primeras semanas.';
-  if (average >= 60) return 'Sugerencia IA: el evaluado puede avanzar con refuerzo focalizado en los módulos de menor puntaje antes de asumir mayor complejidad.';
-  return 'Sugerencia IA: se recomienda una nivelación breve antes de avanzar, priorizando habilidades base y práctica guiada.';
+  if (average >= 80) {
+    return 'Recomendacion IA: avanzar con el postulante.\nEl resultado es consistente para iniciar en el rol con seguimiento ligero.';
+  }
+  if (average >= 60) {
+    return 'Recomendacion IA: avanzar con refuerzo.\nValidar brechas del rol postulado antes de asignar tareas criticas.';
+  }
+  return 'Recomendacion IA: no avanzar por ahora.\nSe sugiere nivelacion previa y nueva evaluacion para el rol postulado.';
 }
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
-  if (request.method !== 'POST') return jsonResponse({ error: 'Método no permitido.' }, 405);
+  if (request.method !== 'POST') return jsonResponse({ error: 'Metodo no permitido.' }, 405);
 
   try {
     const requester = await getRequester(request.headers.get('Authorization'));
@@ -78,7 +82,9 @@ Deno.serve(async (request) => {
 
     const profileRows = await supabaseRequest(`/rest/v1/profiles?select=role&id=eq.${encodeURIComponent(requester.id)}&limit=1`);
     const requesterProfile = profileRows?.[0];
-    const resultRows = await supabaseRequest(`/rest/v1/resultados?select=*,evaluados(*),asignaciones(*)&id=eq.${encodeURIComponent(resultado_id)}&limit=1`);
+    const resultRows = await supabaseRequest(
+      `/rest/v1/resultados?select=*,evaluados(*,areas(*),perfiles_operativos(*)),asignaciones(*)&id=eq.${encodeURIComponent(resultado_id)}&limit=1`,
+    );
     const result = resultRows?.[0];
     if (!result) return jsonResponse({ error: 'Resultado no encontrado.' }, 404);
 
@@ -97,7 +103,12 @@ Deno.serve(async (request) => {
 
     if (apiKey) {
       const prompt = {
-        evaluado: result.evaluados?.nombre_completo || 'Evaluado',
+        posicion_postulada: {
+          area: result.evaluados?.areas?.nombre || 'No definida',
+          perfil_operativo: result.evaluados?.perfiles_operativos?.nombre || 'No definido',
+          cargo: result.evaluados?.cargo_especifico || result.evaluados?.cargo || 'No definido',
+          unidad: result.evaluados?.unidad || result.evaluados?.campana || 'No definida',
+        },
         resultado_final: result.resultado_final,
         promedio_general: result.promedio_general,
         puntajes: {
@@ -106,8 +117,6 @@ Deno.serve(async (request) => {
           etica: result.puntaje_etica,
           kpis: result.puntaje_kpis,
         },
-        diagnostico: result.diagnostico,
-        recomendacion: result.recomendacion,
         estado_resultado: result.estado_resultado,
       };
 
@@ -122,14 +131,14 @@ Deno.serve(async (request) => {
           input: [
             {
               role: 'system',
-              content: 'Eres un asistente para una plataforma de diagnóstico BPO. Genera una sola sugerencia breve, profesional y accionable. No inventes datos. Máximo 45 palabras.',
+              content: 'Eres un asistente de seleccion para una plataforma de diagnostico BPO. Usa unicamente la posicion postulada y el dashboard de resultados entregado. Responde maximo 2 lineas. Debe indicar claramente si recomiendas avanzar, avanzar con refuerzo o no avanzar. No inventes datos.',
             },
             {
               role: 'user',
-              content: `Genera una sugerencia corta para este resultado:\n${JSON.stringify(prompt)}`,
+              content: `Da una recomendacion breve para este postulante:\n${JSON.stringify(prompt)}`,
             },
           ],
-          max_output_tokens: 120,
+          max_output_tokens: 90,
         }),
       });
 

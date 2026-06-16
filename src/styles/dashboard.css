@@ -220,6 +220,13 @@
   display: block;
 }
 
+.result-summary small {
+  color: var(--text-muted);
+  display: block;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 .result-summary strong,
 .module-score strong {
   color: var(--text-main);

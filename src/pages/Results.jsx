@@ -63,6 +63,12 @@ export default function Results() {
     }
 
     const result = state.selected;
+    const postulacion = {
+      area: result.evaluados?.areas?.nombre || 'No definida',
+      perfil: result.evaluados?.perfiles_operativos?.nombre || 'No definido',
+      cargo: result.evaluados?.cargo_especifico || result.evaluados?.cargo || 'No definido',
+      unidad: result.evaluados?.unidad || result.evaluados?.campana || 'No definida',
+    };
     return (
       <section className="page-stack detail-page">
         <div className="result-hero">
@@ -76,6 +82,11 @@ export default function Results() {
         </div>
 
         <div className="result-summary">
+          <div>
+            <span>Postula a</span>
+            <strong>{postulacion.cargo}</strong>
+            <small>{postulacion.perfil} · {postulacion.area} · {postulacion.unidad}</small>
+          </div>
           <div>
             <span>Promedio general</span>
             <strong>{formatPercent(result.promedio_general)}</strong>
