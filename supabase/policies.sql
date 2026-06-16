@@ -10,6 +10,10 @@ alter table public.questions enable row level security;
 alter table public.question_options enable row level security;
 alter table public.evaluation_responses enable row level security;
 alter table public.manual_reviews enable row level security;
+alter table public.areas enable row level security;
+alter table public.perfiles_operativos enable row level security;
+alter table public.evaluation_targets enable row level security;
+alter table public.competencias enable row level security;
 
 create or replace function public.current_profile_role()
 returns text
@@ -24,6 +28,55 @@ create policy "profiles_select_own_or_admin"
 on public.profiles for select
 to authenticated
 using (id = auth.uid() or public.current_profile_role() = 'admin');
+
+create policy "admin_manage_areas"
+on public.areas for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_active_areas"
+on public.areas for select
+to authenticated
+using (estado = 'activa' or public.current_profile_role() = 'admin');
+
+create policy "admin_manage_perfiles_operativos"
+on public.perfiles_operativos for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_active_perfiles_operativos"
+on public.perfiles_operativos for select
+to authenticated
+using (estado = 'activo' or public.current_profile_role() = 'admin');
+
+create policy "admin_manage_evaluation_targets"
+on public.evaluation_targets for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_evaluation_targets"
+on public.evaluation_targets for select
+to authenticated
+using (true);
+
+create policy "anon_read_evaluation_targets"
+on public.evaluation_targets for select
+to anon
+using (true);
+
+create policy "admin_manage_competencias"
+on public.competencias for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_active_competencias"
+on public.competencias for select
+to authenticated
+using (estado = 'activa' or public.current_profile_role() = 'admin');
 
 create policy "admin_select_all_evaluados"
 on public.evaluados for select

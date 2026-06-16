@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, Bell, FileBarChart, LayoutDashboard, ListChecks, LogOut, Search, Settings, UserCog, UserPlus, Users } from 'lucide-react';
+import { BarChart3, Bell, FileBarChart, LayoutDashboard, Library, ListChecks, LogOut, Search, Settings, Table2, UserCog, UserPlus, Users } from 'lucide-react';
 import { signOut } from '../services/authService.js';
 import { ROLE_LABELS } from '../utils/roles.js';
 import Logo from './Logo.jsx';
@@ -18,6 +18,8 @@ export default function Navbar({ profile }) {
     { to: homePath, label: 'Dashboard', icon: LayoutDashboard },
     { to: '/evaluados', label: 'Evaluados', icon: Users },
     ...(isAdmin ? [{ to: '/admin/evaluaciones', label: 'Evaluaciones', icon: ListChecks }] : []),
+    ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Catálogos', icon: Library }] : []),
+    ...(isAdmin ? [{ to: '/admin/matriz-evaluaciones', label: 'Matriz de perfiles', icon: Table2 }] : []),
     ...(isAdmin ? [{ to: '/admin/usuarios', label: 'Usuarios', icon: UserCog }] : []),
     ...(!isAdmin ? [{ to: '/asignar-evaluacion', label: 'Asignar evaluación', icon: UserPlus }] : []),
     { to: '/resultados', label: 'Resultados', icon: BarChart3 },

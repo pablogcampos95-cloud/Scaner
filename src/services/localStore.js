@@ -8,6 +8,23 @@ const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
 const seed = {
+  areas: [
+    { id: 'area-formacion', nombre: 'Formación', descripcion: 'Capacitación e inducción.', estado: 'activa', created_at: now.toISOString() },
+    { id: 'area-calidad', nombre: 'Calidad', descripcion: 'Monitoreo y calibración.', estado: 'activa', created_at: now.toISOString() },
+    { id: 'area-operaciones', nombre: 'Operaciones', descripcion: 'Gestión operativa y productividad.', estado: 'activa', created_at: now.toISOString() },
+  ],
+  perfiles_operativos: [
+    { id: 'perfil-formador', nombre: 'Formador', descripcion: 'Facilitación y diseño instruccional.', estado: 'activo', created_at: now.toISOString() },
+    { id: 'perfil-analista', nombre: 'Analista', descripcion: 'Análisis, reportería e indicadores.', estado: 'activo', created_at: now.toISOString() },
+    { id: 'perfil-monitor', nombre: 'Monitor', descripcion: 'Monitoreo, calidad y feedback.', estado: 'activo', created_at: now.toISOString() },
+    { id: 'perfil-supervisor', nombre: 'Supervisor', descripcion: 'Gestión de equipos y KPIs.', estado: 'activo', created_at: now.toISOString() },
+  ],
+  competencias: [
+    { id: 'comp-formador-comunicacion', nombre: 'Comunicación', perfil_operativo_id: 'perfil-formador', estado: 'activa', created_at: now.toISOString() },
+    { id: 'comp-analista-excel', nombre: 'Excel', perfil_operativo_id: 'perfil-analista', estado: 'activa', created_at: now.toISOString() },
+    { id: 'comp-monitor-feedback', nombre: 'Feedback', perfil_operativo_id: 'perfil-monitor', estado: 'activa', created_at: now.toISOString() },
+    { id: 'comp-supervisor-kpis', nombre: 'Seguimiento de KPIs', perfil_operativo_id: 'perfil-supervisor', estado: 'activa', created_at: now.toISOString() },
+  ],
   profiles: [
     {
       id: 'admin-demo',
@@ -35,6 +52,10 @@ const seed = {
       telefono: '999111222',
       campana: 'Ventas Outbound',
       cargo: 'Asesora comercial',
+      area_id: 'area-operaciones',
+      perfil_operativo_id: 'perfil-analista',
+      cargo_especifico: 'Analista operativo',
+      unidad: 'Ventas Outbound',
       sede: 'Lima Centro',
       modalidad: 'Presencial',
       observaciones: 'Ingreso para campaña piloto.',
@@ -49,6 +70,10 @@ const seed = {
       telefono: '988777666',
       campana: 'Back Office',
       cargo: 'Analista operativo',
+      area_id: 'area-calidad',
+      perfil_operativo_id: 'perfil-monitor',
+      cargo_especifico: 'Monitor de calidad',
+      unidad: 'Back Office',
       sede: 'Remoto',
       modalidad: 'Remoto',
       observaciones: '',
@@ -63,8 +88,14 @@ const seed = {
       descripcion: 'Evaluación inicial para roles BPO, ventas, contact center y back office.',
       estado: 'activa',
       puntaje_aprobacion: 80,
+      tipo_evaluacion: 'diagnostico',
+      nivel: 'basico',
+      es_transversal: true,
       created_at: now.toISOString(),
     },
+  ],
+  evaluation_targets: [
+    { id: 'target-base', evaluacion_id: 'evaluacion-base', area_id: null, perfil_operativo_id: null, is_transversal: true, created_at: now.toISOString() },
   ],
   asignaciones: [
     {

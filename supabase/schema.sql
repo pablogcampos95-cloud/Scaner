@@ -9,6 +9,24 @@ create table if not exists public.profiles (
   created_at timestamp with time zone not null default now()
 );
 
+create table if not exists public.areas (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null unique,
+  descripcion text,
+  estado text default 'activa',
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create table if not exists public.perfiles_operativos (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null unique,
+  descripcion text,
+  estado text default 'activo',
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
 create table if not exists public.evaluados (
   id uuid primary key default gen_random_uuid(),
   nombre_completo text not null,
@@ -23,6 +41,11 @@ create table if not exists public.evaluados (
   supervisor_id uuid not null references public.profiles(id),
   created_at timestamp with time zone not null default now()
 );
+
+alter table public.evaluados add column if not exists area_id uuid references public.areas(id);
+alter table public.evaluados add column if not exists perfil_operativo_id uuid references public.perfiles_operativos(id);
+alter table public.evaluados add column if not exists cargo_especifico text;
+alter table public.evaluados add column if not exists unidad text;
 
 create table if not exists public.evaluaciones (
   id uuid primary key default gen_random_uuid(),
@@ -40,6 +63,26 @@ alter table public.evaluaciones add column if not exists objetivo text;
 alter table public.evaluaciones add column if not exists tiempo_limite_minutos integer;
 alter table public.evaluaciones add column if not exists created_by uuid references public.profiles(id);
 alter table public.evaluaciones add column if not exists updated_at timestamp with time zone default now();
+alter table public.evaluaciones add column if not exists tipo_evaluacion text;
+alter table public.evaluaciones add column if not exists nivel text;
+alter table public.evaluaciones add column if not exists es_transversal boolean default false;
+
+create table if not exists public.evaluation_targets (
+  id uuid primary key default gen_random_uuid(),
+  evaluacion_id uuid references public.evaluaciones(id) on delete cascade,
+  area_id uuid references public.areas(id) on delete cascade,
+  perfil_operativo_id uuid references public.perfiles_operativos(id) on delete cascade,
+  is_transversal boolean default false,
+  created_at timestamp with time zone default now()
+);
+
+create unique index if not exists evaluation_targets_unique_target
+on public.evaluation_targets (
+  evaluacion_id,
+  coalesce(area_id, '00000000-0000-0000-0000-000000000000'::uuid),
+  coalesce(perfil_operativo_id, '00000000-0000-0000-0000-000000000000'::uuid),
+  is_transversal
+);
 
 create table if not exists public.asignaciones (
   id uuid primary key default gen_random_uuid(),
@@ -104,6 +147,21 @@ create table if not exists public.questions (
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone default now()
 );
+
+create table if not exists public.competencias (
+  id uuid primary key default gen_random_uuid(),
+  nombre text not null,
+  descripcion text,
+  perfil_operativo_id uuid references public.perfiles_operativos(id),
+  area_id uuid references public.areas(id),
+  estado text default 'activa',
+  created_at timestamp with time zone default now()
+);
+
+alter table public.questions add column if not exists competencia_id uuid references public.competencias(id);
+alter table public.questions add column if not exists area_id uuid references public.areas(id);
+alter table public.questions add column if not exists perfil_operativo_id uuid references public.perfiles_operativos(id);
+alter table public.questions add column if not exists nivel text;
 
 create table if not exists public.question_options (
   id uuid primary key default gen_random_uuid(),

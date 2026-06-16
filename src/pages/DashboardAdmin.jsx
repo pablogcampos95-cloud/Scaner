@@ -87,6 +87,8 @@ export default function DashboardAdmin() {
         <MetricCard title="Aptos" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO).length} tone="success" />
         <MetricCard title="Aptos con refuerzo" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO_REFUERZO).length} tone="warning" />
         <MetricCard title="No aptos temporales" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.NO_APTO).length} tone="danger" />
+        <MetricCard title="Areas con evaluados" value={new Set(rows.map((row) => row.evaluados?.area_id).filter(Boolean)).size} />
+        <MetricCard title="Perfiles con evaluados" value={new Set(rows.map((row) => row.evaluados?.perfil_operativo_id).filter(Boolean)).size} />
       </div>
 
       <div className="filters-bar">

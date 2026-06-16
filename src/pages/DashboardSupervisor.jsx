@@ -22,12 +22,10 @@ export default function DashboardSupervisor() {
 
   useEffect(loadData, [profile]);
 
-  const rows = useMemo(() => {
-    return state.asignaciones.map((assignment) => ({
-      ...assignment,
-      resultado: state.resultados.find((item) => item.asignacion_id === assignment.id),
-    }));
-  }, [state.asignaciones, state.resultados]);
+  const rows = useMemo(() => state.asignaciones.map((assignment) => ({
+    ...assignment,
+    resultado: state.resultados.find((item) => item.asignacion_id === assignment.id),
+  })), [state.asignaciones, state.resultados]);
 
   const average = state.resultados.length
     ? Math.round(state.resultados.reduce((sum, item) => sum + Number(item.promedio_general || 0), 0) / state.resultados.length)
@@ -36,7 +34,7 @@ export default function DashboardSupervisor() {
   const handleResend = async (row) => {
     try {
       const response = await sendEvaluationInvitation({ asignacion: row, evaluado: row.evaluados });
-      setState((prev) => ({ ...prev, notice: `Invitación enviada: ${response.publicUrl}` }));
+      setState((prev) => ({ ...prev, notice: `Invitacion enviada: ${response.publicUrl}` }));
       loadData();
     } catch (error) {
       setState((prev) => ({ ...prev, error: error.message }));
@@ -45,22 +43,22 @@ export default function DashboardSupervisor() {
 
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
-    { key: 'dni', header: 'DNI/código', render: (row) => row.evaluados?.dni_codigo || '-' },
+    { key: 'dni', header: 'DNI/codigo', render: (row) => row.evaluados?.dni_codigo || '-' },
     { key: 'correo', header: 'Correo', render: (row) => row.evaluados?.correo || '-' },
-    { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || '-' },
-    { key: 'cargo', header: 'Cargo', render: (row) => row.evaluados?.cargo || '-' },
+    { key: 'area', header: 'Area', render: (row) => row.evaluados?.areas?.nombre || '-' },
+    { key: 'perfil', header: 'Perfil', render: (row) => row.evaluados?.perfiles_operativos?.nombre || '-' },
+    { key: 'campana', header: 'Campana/unidad', render: (row) => row.evaluados?.unidad || row.evaluados?.campana || '-' },
+    { key: 'cargo', header: 'Cargo', render: (row) => row.evaluados?.cargo_especifico || row.evaluados?.cargo || '-' },
     { key: 'estado', header: 'Estado', render: (row) => <StatusBadge status={row.estado} /> },
     { key: 'resultado', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado?.resultado_final} /> },
-    { key: 'limite', header: 'Fecha límite', render: (row) => formatDate(row.fecha_limite) },
+    { key: 'limite', header: 'Fecha limite', render: (row) => formatDate(row.fecha_limite) },
     {
       key: 'acciones',
       header: 'Acciones',
       render: (row) => (
         <div className="table-actions">
           {row.resultado ? <Link to={`/resultados/${row.resultado.id}`}>Ver</Link> : null}
-          <button type="button" onClick={() => handleResend(row)}>
-            Reenviar
-          </button>
+          <button type="button" onClick={() => handleResend(row)}>Reenviar</button>
         </div>
       ),
     },
@@ -72,12 +70,12 @@ export default function DashboardSupervisor() {
         <div>
           <Logo size="sm" showText={false} />
           <span className="eyebrow">Supervisor</span>
-          <h1>Asigna y monitorea diagnósticos de tu equipo</h1>
-          <p>Registra evaluados, envía pruebas y revisa resultados por campaña, cargo y estado.</p>
+          <h1>Asigna y monitorea diagnosticos de tu equipo</h1>
+          <p>Registra evaluados, envia pruebas y revisa resultados por area, perfil, campana y estado.</p>
         </div>
         <div className="hero-actions">
           <Link className="primary-button compact" to="/registrar-evaluado">Registrar evaluado</Link>
-          <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluación</Link>
+          <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluacion</Link>
         </div>
       </div>
 
@@ -92,6 +90,8 @@ export default function DashboardSupervisor() {
         <MetricCard title="Completadas" value={rows.filter((row) => row.estado === 'completada').length} tone="success" />
         <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
         <MetricCard title="Promedio general" value={formatPercent(average)} />
+        <MetricCard title="Areas con evaluados" value={new Set(rows.map((row) => row.evaluados?.area_id).filter(Boolean)).size} />
+        <MetricCard title="Perfiles con evaluados" value={new Set(rows.map((row) => row.evaluados?.perfil_operativo_id).filter(Boolean)).size} />
       </div>
 
       <DataTable columns={columns} rows={rows} loading={state.loading} />

@@ -1,21 +1,32 @@
 import { isSupabaseConfigured, supabase } from './supabaseClient.js';
-import { insertLocal, listLocal } from './localStore.js';
+import { insertLocal, listLocal, updateLocal } from './localStore.js';
 
 export async function listEvaluados(profile) {
   if (isSupabaseConfigured) {
-    let query = supabase.from('evaluados').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('evaluados').select('*, areas(*), perfiles_operativos(*)').order('created_at', { ascending: false });
     if (profile?.role === 'supervisor') query = query.eq('supervisor_id', profile.id);
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return data;
   }
 
-  const rows = listLocal('evaluados');
+  const areas = listLocal('areas');
+  const perfiles = listLocal('perfiles_operativos');
+  const rows = listLocal('evaluados').map((row) => ({
+    ...row,
+    areas: areas.find((area) => area.id === row.area_id),
+    perfiles_operativos: perfiles.find((perfil) => perfil.id === row.perfil_operativo_id),
+  }));
   return profile?.role === 'supervisor' ? rows.filter((row) => row.supervisor_id === profile.id) : rows;
 }
 
 export async function createEvaluado(values, supervisorId) {
-  const payload = { ...values, supervisor_id: supervisorId };
+  const payload = {
+    ...values,
+    campana: values.unidad || values.campana,
+    cargo: values.cargo_especifico || values.cargo,
+    supervisor_id: supervisorId,
+  };
 
   if (isSupabaseConfigured) {
     const { data, error } = await supabase.from('evaluados').insert(payload).select().single();
@@ -24,4 +35,20 @@ export async function createEvaluado(values, supervisorId) {
   }
 
   return insertLocal('evaluados', payload);
+}
+
+export async function updateEvaluado(id, values) {
+  const payload = {
+    ...values,
+    campana: values.unidad || values.campana,
+    cargo: values.cargo_especifico || values.cargo,
+  };
+
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from('evaluados').update(payload).eq('id', id).select('*, areas(*), perfiles_operativos(*)').single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  return updateLocal('evaluados', id, payload);
 }

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import QuestionRenderer from '../evaluation-runner/QuestionRenderer.jsx';
+import { getAreasActivas, getCompetenciasActivas, getPerfilesOperativosActivos } from '../../services/catalogosService.js';
 import { createQuestion, createQuestionOption, updateQuestion } from '../../services/evaluacionesService.js';
 import AudioQuestionSettings from './AudioQuestionSettings.jsx';
 import KpiQuestionSettings from './KpiQuestionSettings.jsx';
@@ -26,13 +27,24 @@ export default function QuestionBuilder({ evaluacionId, sections, onCreated }) {
     puntaje: 1,
     required: true,
     scoring_mode: 'auto',
+    competencia_id: '',
+    area_id: '',
+    perfil_operativo_id: '',
+    nivel: '',
   });
+  const [catalogs, setCatalogs] = useState({ areas: [], perfiles: [], competencias: [] });
   const [options, setOptions] = useState(initialOptions);
   const [settings, setSettings] = useState({});
   const [correctAnswer, setCorrectAnswer] = useState({});
   const [rubric, setRubric] = useState({});
   const [preview, setPreview] = useState(false);
   const [status, setStatus] = useState({ error: '', saving: false });
+
+  useEffect(() => {
+    Promise.all([getAreasActivas(), getPerfilesOperativosActivos(), getCompetenciasActivas()])
+      .then(([areas, perfiles, competencias]) => setCatalogs({ areas, perfiles, competencias }))
+      .catch(() => setCatalogs({ areas: [], perfiles: [], competencias: [] }));
+  }, []);
 
   const validate = () => {
     if (!question.titulo.trim()) return 'La pregunta debe tener título.';
@@ -69,7 +81,7 @@ export default function QuestionBuilder({ evaluacionId, sections, onCreated }) {
         });
       }
 
-      setQuestion({ evaluacion_id: evaluacionId, section_id: '', question_type: '', titulo: '', descripcion: '', instrucciones: '', puntaje: 1, required: true, scoring_mode: 'auto' });
+      setQuestion({ evaluacion_id: evaluacionId, section_id: '', question_type: '', titulo: '', descripcion: '', instrucciones: '', puntaje: 1, required: true, scoring_mode: 'auto', competencia_id: '', area_id: '', perfil_operativo_id: '', nivel: '' });
       setOptions(initialOptions);
       setSettings({});
       setCorrectAnswer({});
@@ -102,6 +114,36 @@ export default function QuestionBuilder({ evaluacionId, sections, onCreated }) {
         <label>
           Puntaje
           <input type="number" value={question.puntaje} onChange={(event) => setQuestion({ ...question, puntaje: Number(event.target.value) })} />
+        </label>
+        <label>
+          Competencia
+          <select value={question.competencia_id || ''} onChange={(event) => setQuestion({ ...question, competencia_id: event.target.value })}>
+            <option value="">Sin competencia</option>
+            {catalogs.competencias.map((competencia) => <option key={competencia.id} value={competencia.id}>{competencia.nombre}</option>)}
+          </select>
+        </label>
+        <label>
+          Área
+          <select value={question.area_id || ''} onChange={(event) => setQuestion({ ...question, area_id: event.target.value })}>
+            <option value="">Sin área</option>
+            {catalogs.areas.map((area) => <option key={area.id} value={area.id}>{area.nombre}</option>)}
+          </select>
+        </label>
+        <label>
+          Perfil operativo
+          <select value={question.perfil_operativo_id || ''} onChange={(event) => setQuestion({ ...question, perfil_operativo_id: event.target.value })}>
+            <option value="">Sin perfil</option>
+            {catalogs.perfiles.map((perfil) => <option key={perfil.id} value={perfil.id}>{perfil.nombre}</option>)}
+          </select>
+        </label>
+        <label>
+          Nivel
+          <select value={question.nivel || ''} onChange={(event) => setQuestion({ ...question, nivel: event.target.value })}>
+            <option value="">Sin nivel</option>
+            <option value="basico">Básico</option>
+            <option value="intermedio">Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+          </select>
         </label>
       </div>
       <label>

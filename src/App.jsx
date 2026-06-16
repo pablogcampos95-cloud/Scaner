@@ -3,11 +3,13 @@ import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import RoleRoute from './components/RoleRoute.jsx';
 import AssignEvaluation from './pages/AssignEvaluation.jsx';
+import AdminCatalogs from './pages/AdminCatalogs.jsx';
 import AdminEvaluations from './pages/AdminEvaluations.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import DashboardAdmin from './pages/DashboardAdmin.jsx';
 import DashboardSupervisor from './pages/DashboardSupervisor.jsx';
 import Evaluados from './pages/Evaluados.jsx';
+import EvaluationMatrix from './pages/EvaluationMatrix.jsx';
 import EvaluationCompleted from './pages/EvaluationCompleted.jsx';
 import EvaluationPublic from './pages/EvaluationPublic.jsx';
 import Login from './pages/Login.jsx';
@@ -29,6 +31,8 @@ export default function App() {
           <Route element={<RoleRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<DashboardAdmin />} />
             <Route path="/admin/usuarios" element={<AdminUsers />} />
+            <Route path="/admin/catalogos" element={<AdminCatalogs />} />
+            <Route path="/admin/matriz-evaluaciones" element={<EvaluationMatrix />} />
             <Route path="/admin/evaluaciones" element={<AdminEvaluations />} />
             <Route path="/admin/evaluaciones/nueva" element={<AdminEvaluations mode="new" />} />
             <Route path="/admin/evaluaciones/:id/editar" element={<AdminEvaluations mode="edit" />} />
