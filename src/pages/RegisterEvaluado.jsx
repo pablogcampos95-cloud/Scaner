@@ -45,13 +45,13 @@ export default function RegisterEvaluado() {
     <section className="page-stack narrow-page">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Registro</span>
+          <span className="eyebrow">Registro operativo</span>
           <h1>Registrar evaluado</h1>
+          <p>Ingresa los datos del colaborador, postulante o asesor a diagnosticar.</p>
         </div>
-        <Link to="/asignar-evaluacion">Asignar evaluación</Link>
       </div>
 
-      <form className="form-card" onSubmit={handleSubmit}>
+      <form className="form-card modern-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           {[
             ['nombre_completo', 'Nombre completo'],
@@ -78,9 +78,12 @@ export default function RegisterEvaluado() {
         {status.message ? <p className="alert success">{status.message}</p> : null}
         {status.error ? <p className="alert error">{status.error}</p> : null}
 
-        <button className="primary-button" type="submit" disabled={status.saving}>
-          {status.saving ? 'Guardando...' : 'Guardar evaluado'}
-        </button>
+        <div className="form-actions">
+          <Link className="secondary-button" to="/supervisor">Volver</Link>
+          <button className="primary-button" type="submit" disabled={status.saving}>
+            {status.saving ? 'Guardando...' : 'Guardar evaluado'}
+          </button>
+        </div>
       </form>
     </section>
   );

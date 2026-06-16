@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
+import Logo from '../components/Logo.jsx';
 import MetricCard from '../components/MetricCard.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
@@ -40,6 +41,7 @@ export default function DashboardAdmin() {
   });
 
   const completed = rows.filter((row) => row.estado === 'completada').length;
+  const assigned = rows.length;
   const average = data.resultados.length
     ? Math.round(data.resultados.reduce((sum, item) => sum + Number(item.promedio_general || 0), 0) / data.resultados.length)
     : 0;
@@ -60,10 +62,16 @@ export default function DashboardAdmin() {
 
   return (
     <section className="page-stack">
-      <div className="page-heading">
+      <div className="dashboard-hero">
         <div>
+          <Logo size="sm" showText={false} />
           <span className="eyebrow">Administrador</span>
-          <h1>Dashboard general</h1>
+          <h1>Controla el diagnóstico de competencias de tu operación</h1>
+          <p>Visualiza resultados, brechas y avances de tus evaluaciones comerciales, operativas y de contact center.</p>
+        </div>
+        <div className="hero-actions">
+          <Link className="primary-button compact" to="/resultados">Ver resultados</Link>
+          <button className="secondary-button" type="button">Gestionar evaluaciones</button>
         </div>
       </div>
 
@@ -71,8 +79,9 @@ export default function DashboardAdmin() {
 
       <div className="metrics-grid">
         <MetricCard title="Total evaluados" value={new Set(rows.map((row) => row.evaluado_id)).size} />
+        <MetricCard title="Evaluaciones asignadas" value={assigned} />
         <MetricCard title="Completadas" value={completed} tone="success" />
-        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} tone="warning" />
+        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
         <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
         <MetricCard title="Promedio general" value={formatPercent(average)} />
         <MetricCard title="Aptos" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO).length} tone="success" />

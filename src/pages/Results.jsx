@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
+import Logo from '../components/Logo.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import { getResultadoById, listResultados } from '../services/resultadosService.js';
 import { MODULES } from '../utils/constants.js';
@@ -33,10 +34,12 @@ export default function Results() {
     const result = state.selected;
     return (
       <section className="page-stack detail-page">
-        <div className="page-heading">
+        <div className="result-hero">
+          <Logo size="sm" showText={false} />
           <div>
             <span className="eyebrow">Informe individual</span>
             <h1>{result.evaluados?.nombre_completo || 'Evaluado'}</h1>
+            <p>Resultado final del diagnóstico de competencias operativas y comerciales.</p>
           </div>
           <ResultBadge result={result.resultado_final} />
         </div>
@@ -63,10 +66,13 @@ export default function Results() {
         </div>
 
         <section className="plain-section">
-          <h2>Diagnóstico</h2>
+          <h2>Diagnóstico automático</h2>
           <p>{result.diagnostico}</p>
-          <h2>Recomendación</h2>
+          <h2>Recomendación de capacitación</h2>
           <p>{result.recomendacion}</p>
+          <Link className="secondary-button compact" to={profile.role === 'admin' ? '/admin' : '/supervisor'}>
+            Volver al dashboard
+          </Link>
         </section>
       </section>
     );
@@ -89,6 +95,7 @@ export default function Results() {
     <section className="page-stack">
       <div className="page-heading">
         <div>
+          <Logo size="sm" showText={false} />
           <span className="eyebrow">Resultados</span>
           <h1>Informes de evaluación</h1>
         </div>

@@ -1,9 +1,8 @@
 .login-page {
   background:
-    linear-gradient(90deg, rgba(16, 35, 63, 0.94), rgba(31, 95, 153, 0.86)),
-    url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80");
-  background-position: center;
-  background-size: cover;
+    radial-gradient(circle at 20% 20%, rgba(0, 200, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 80% 30%, rgba(24, 119, 255, 0.2), transparent 32%),
+    linear-gradient(135deg, #061426, #071a33 48%, #061426);
   display: grid;
   min-height: 100vh;
   place-items: center;
@@ -13,51 +12,71 @@
 .login-panel {
   align-items: center;
   display: grid;
-  gap: 40px;
+  gap: 44px;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 440px);
-  max-width: 1120px;
+  max-width: 1160px;
   width: 100%;
 }
 
 .login-copy {
-  color: #fff;
+  color: var(--text-main);
 }
 
-.login-copy .eyebrow {
-  color: #a9d4ff;
+.login-hero-logo {
+  margin-bottom: 18px;
 }
 
 .login-copy h1 {
-  font-size: 44px;
-  line-height: 1.08;
+  font-size: 56px;
+  line-height: 1.02;
   margin-bottom: 18px;
   max-width: 760px;
 }
 
 .login-copy p {
-  color: #e8f2ff;
-  font-size: 18px;
-  max-width: 620px;
+  color: var(--text-muted);
+  font-size: 20px;
+  max-width: 640px;
 }
 
 .form-card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(16, 33, 63, 0.98), rgba(11, 29, 56, 0.98));
+  border: 1px solid rgba(0, 200, 255, 0.25);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
   display: grid;
   gap: 18px;
   padding: 24px;
 }
 
+.login-form {
+  padding: 28px;
+}
+
+.login-form-logo {
+  justify-content: center;
+}
+
 .form-title {
   align-items: center;
-  color: var(--navy);
+  color: var(--text-main);
   display: flex;
-  gap: 10px;
+  gap: 12px;
+}
+
+.form-title.centered {
+  justify-content: center;
+  text-align: center;
 }
 
 .form-title h2 {
   margin: 0;
+}
+
+.form-title p {
+  color: var(--text-muted);
+  margin: 4px 0 0;
 }
 
 .form-grid {
@@ -67,7 +86,7 @@
 }
 
 label {
-  color: var(--navy);
+  color: var(--text-main);
   display: grid;
   font-weight: 800;
   gap: 8px;
@@ -76,12 +95,20 @@ label {
 input,
 select,
 textarea {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text);
-  min-height: 44px;
+  background: rgba(6, 20, 38, 0.92);
+  border: 1px solid rgba(30, 78, 120, 0.9);
+  border-radius: 10px;
+  color: var(--text-main);
+  min-height: 48px;
   padding: 10px 12px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.12);
+  outline: none;
 }
 
 textarea {
@@ -89,20 +116,24 @@ textarea {
 }
 
 .field-error {
-  color: var(--danger);
-  font-weight: 700;
+  color: #fca5a5;
+  font-weight: 800;
 }
 
 .demo-note {
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 13px;
   margin-bottom: 0;
 }
 
 .check-row {
   align-items: center;
+  background: rgba(0, 200, 255, 0.08);
+  border: 1px solid rgba(0, 200, 255, 0.22);
+  border-radius: 12px;
   display: flex;
   gap: 10px;
+  padding: 12px;
 }
 
 .check-row input {
@@ -110,13 +141,52 @@ textarea {
   width: 18px;
 }
 
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.guided-form {
+  gap: 14px;
+}
+
+.guided-step {
+  align-items: start;
+  background: rgba(6, 20, 38, 0.44);
+  border: 1px solid rgba(30, 78, 120, 0.72);
+  border-radius: 14px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 16px;
+}
+
+.guided-step > span {
+  align-items: center;
+  background: rgba(0, 200, 255, 0.12);
+  border: 1px solid rgba(0, 200, 255, 0.28);
+  border-radius: 999px;
+  color: var(--primary);
+  display: inline-flex;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
 @media (max-width: 860px) {
   .login-panel,
-  .form-grid {
+  .form-grid,
+  .guided-step {
     grid-template-columns: 1fr;
   }
 
   .login-copy h1 {
-    font-size: 32px;
+    font-size: 38px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
   }
 }

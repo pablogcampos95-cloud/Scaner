@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
+import Logo from '../components/Logo.jsx';
 import MetricCard from '../components/MetricCard.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
@@ -35,7 +36,7 @@ export default function DashboardSupervisor() {
   const handleResend = async (row) => {
     try {
       const response = await sendEvaluationInvitation({ asignacion: row, evaluado: row.evaluados });
-      setState((prev) => ({ ...prev, notice: `Invitación preparada: ${response.publicUrl}` }));
+      setState((prev) => ({ ...prev, notice: `Invitación enviada: ${response.publicUrl}` }));
       loadData();
     } catch (error) {
       setState((prev) => ({ ...prev, error: error.message }));
@@ -67,14 +68,17 @@ export default function DashboardSupervisor() {
 
   return (
     <section className="page-stack">
-      <div className="page-heading">
+      <div className="dashboard-hero">
         <div>
+          <Logo size="sm" showText={false} />
           <span className="eyebrow">Supervisor</span>
-          <h1>Mis evaluaciones</h1>
+          <h1>Asigna y monitorea diagnósticos de tu equipo</h1>
+          <p>Registra evaluados, envía pruebas y revisa resultados por campaña, cargo y estado.</p>
         </div>
-        <Link className="primary-button compact" to="/registrar-evaluado">
-          Registrar evaluado
-        </Link>
+        <div className="hero-actions">
+          <Link className="primary-button compact" to="/registrar-evaluado">Registrar evaluado</Link>
+          <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluación</Link>
+        </div>
       </div>
 
       {state.error ? <p className="alert error">{state.error}</p> : null}
@@ -83,11 +87,11 @@ export default function DashboardSupervisor() {
       <div className="metrics-grid">
         <MetricCard title="Mis evaluados" value={new Set(rows.map((row) => row.evaluado_id)).size} />
         <MetricCard title="Asignadas" value={rows.length} />
-        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} tone="warning" />
-        <MetricCard title="En proceso" value={rows.filter((row) => row.estado === 'en_proceso').length} />
+        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
+        <MetricCard title="En proceso" value={rows.filter((row) => row.estado === 'en_proceso').length} tone="warning" />
         <MetricCard title="Completadas" value={rows.filter((row) => row.estado === 'completada').length} tone="success" />
         <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
-        <MetricCard title="Promedio" value={formatPercent(average)} />
+        <MetricCard title="Promedio general" value={formatPercent(average)} />
       </div>
 
       <DataTable columns={columns} rows={rows} loading={state.loading} />

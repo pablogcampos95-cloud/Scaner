@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { LockKeyhole } from 'lucide-react';
+import Logo from '../components/Logo.jsx';
 import Loading from '../components/Loading.jsx';
 import { getCurrentProfile, signIn } from '../services/authService.js';
 import { isSupabaseConfigured } from '../services/supabaseClient.js';
@@ -49,15 +50,20 @@ export default function Login() {
     <main className="login-page">
       <section className="login-panel">
         <div className="login-copy">
-          <span className="eyebrow">BPO · Contact center · Back office</span>
-          <h1>Plataforma de Diagnóstico de Competencias Operativas y Comerciales</h1>
-          <p>Gestión de evaluados, asignaciones, trazabilidad y resultados por rol.</p>
+          <Logo size="lg" showText={false} className="login-hero-logo" />
+          <span className="eyebrow">LMS operativo con enfoque IA</span>
+          <h1>Diagnóstico de Competencias</h1>
+          <p>Validación operativa, comercial y digital para equipos BPO, contact center, ventas y back office.</p>
         </div>
 
         <form className="form-card login-form" onSubmit={handleSubmit}>
-          <div className="form-title">
+          <Logo size="md" showText={false} className="login-form-logo" />
+          <div className="form-title centered">
             <LockKeyhole size={22} />
-            <h2>Iniciar sesión</h2>
+            <div>
+              <h2>Iniciar sesión</h2>
+              <p>Acceso para administradores y supervisores</p>
+            </div>
           </div>
           <label>
             Correo

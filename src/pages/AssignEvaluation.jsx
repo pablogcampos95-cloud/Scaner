@@ -38,7 +38,7 @@ export default function AssignEvaluation() {
 
       if (values.enviar) {
         const response = await sendEvaluationInvitation({ asignacion, evaluado });
-        message = `Asignación creada e invitación simulada. Enlace: ${response.publicUrl}`;
+        message = `Asignación creada e invitación enviada. Enlace: ${response.publicUrl}`;
       }
 
       setValues({ evaluado_id: '', evaluacion_id: '', fecha_limite: '', enviar: true });
@@ -52,46 +52,62 @@ export default function AssignEvaluation() {
     <section className="page-stack narrow-page">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Asignación</span>
+          <span className="eyebrow">Flujo guiado</span>
           <h1>Asignar evaluación</h1>
+          <p>Selecciona un evaluado, define la prueba y genera un enlace único de diagnóstico.</p>
         </div>
-        <Link to="/registrar-evaluado">Registrar nuevo</Link>
+        <Link className="secondary-button" to="/registrar-evaluado">Registrar nuevo</Link>
       </div>
 
-      <form className="form-card" onSubmit={handleSubmit}>
-        <label>
-          Evaluado
-          <select name="evaluado_id" value={values.evaluado_id} onChange={handleChange} disabled={catalogs.loading}>
-            <option value="">Seleccionar evaluado</option>
-            {catalogs.evaluados.map((evaluado) => (
-              <option key={evaluado.id} value={evaluado.id}>
-                {evaluado.nombre_completo} · {evaluado.dni_codigo}
-              </option>
-            ))}
-          </select>
-          {errors.evaluado_id ? <small className="field-error">{errors.evaluado_id}</small> : null}
-        </label>
-        <label>
-          Evaluación
-          <select name="evaluacion_id" value={values.evaluacion_id} onChange={handleChange} disabled={catalogs.loading}>
-            <option value="">Seleccionar evaluación</option>
-            {catalogs.evaluaciones.map((evaluacion) => (
-              <option key={evaluacion.id} value={evaluacion.id}>
-                {evaluacion.nombre}
-              </option>
-            ))}
-          </select>
-          {errors.evaluacion_id ? <small className="field-error">{errors.evaluacion_id}</small> : null}
-        </label>
-        <label>
-          Fecha límite
-          <input name="fecha_limite" type="datetime-local" value={values.fecha_limite} onChange={handleChange} />
-          {errors.fecha_limite ? <small className="field-error">{errors.fecha_limite}</small> : null}
-        </label>
-        <label className="check-row">
-          <input name="enviar" type="checkbox" checked={values.enviar} onChange={handleChange} />
-          Preparar invitación simulada
-        </label>
+      <form className="form-card guided-form" onSubmit={handleSubmit}>
+        <div className="guided-step">
+          <span>01</span>
+          <label>
+            Seleccionar evaluado
+            <select name="evaluado_id" value={values.evaluado_id} onChange={handleChange} disabled={catalogs.loading}>
+              <option value="">Seleccionar evaluado</option>
+              {catalogs.evaluados.map((evaluado) => (
+                <option key={evaluado.id} value={evaluado.id}>
+                  {evaluado.nombre_completo} · {evaluado.dni_codigo}
+                </option>
+              ))}
+            </select>
+            {errors.evaluado_id ? <small className="field-error">{errors.evaluado_id}</small> : null}
+          </label>
+        </div>
+
+        <div className="guided-step">
+          <span>02</span>
+          <label>
+            Seleccionar evaluación
+            <select name="evaluacion_id" value={values.evaluacion_id} onChange={handleChange} disabled={catalogs.loading}>
+              <option value="">Seleccionar evaluación</option>
+              {catalogs.evaluaciones.map((evaluacion) => (
+                <option key={evaluacion.id} value={evaluacion.id}>
+                  {evaluacion.nombre}
+                </option>
+              ))}
+            </select>
+            {errors.evaluacion_id ? <small className="field-error">{errors.evaluacion_id}</small> : null}
+          </label>
+        </div>
+
+        <div className="guided-step">
+          <span>03</span>
+          <label>
+            Definir fecha límite
+            <input name="fecha_limite" type="datetime-local" value={values.fecha_limite} onChange={handleChange} />
+            {errors.fecha_limite ? <small className="field-error">{errors.fecha_limite}</small> : null}
+          </label>
+        </div>
+
+        <div className="guided-step">
+          <span>04</span>
+          <label className="check-row">
+            <input name="enviar" type="checkbox" checked={values.enviar} onChange={handleChange} />
+            Enviar invitación por correo y generar token único
+          </label>
+        </div>
 
         {status.message ? <p className="alert success">{status.message}</p> : null}
         {status.error ? <p className="alert error">{status.error}</p> : null}
