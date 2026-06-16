@@ -46,11 +46,11 @@ export default function AssignEvaluation() {
     try {
       const asignacion = await createAsignacion(values, profile.id);
       const evaluado = catalogs.evaluados.find((item) => item.id === values.evaluado_id);
-      let message = `Asignacion creada. Enlace: ${window.location.origin}/evaluacion/${asignacion.token_unico}`;
+      let message = `Asignación creada. Enlace: ${window.location.origin}/evaluacion/${asignacion.token_unico}`;
 
       if (values.enviar) {
         const response = await sendEvaluationInvitation({ asignacion, evaluado });
-        message = `Asignacion creada e invitacion enviada. Enlace: ${response.publicUrl}`;
+        message = `Asignación creada e invitación enviada. Enlace: ${response.publicUrl}`;
       }
 
       setValues({ evaluado_id: '', evaluacion_id: '', fecha_limite: '', enviar: true });
@@ -65,8 +65,8 @@ export default function AssignEvaluation() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">Flujo guiado</span>
-          <h1>Asignar evaluacion</h1>
-          <p>Selecciona un evaluado y la plataforma mostrara solo evaluaciones compatibles con su area y perfil.</p>
+          <h1>Asignar evaluación</h1>
+          <p>Selecciona una prueba compatible y genera el acceso.</p>
         </div>
         <Link className="secondary-button" to="/registrar-evaluado">Registrar nuevo</Link>
       </div>
@@ -91,7 +91,7 @@ export default function AssignEvaluation() {
         {selectedEvaluado ? (
           <div className="builder-preview">
             <h3>Perfil del evaluado</h3>
-            <span className="badge status--asignada">{selectedEvaluado.areas?.nombre || 'Sin area'}</span>
+            <span className="badge status--asignada">{selectedEvaluado.areas?.nombre || 'Sin área'}</span>
             <span className="badge status--en_proceso">{selectedEvaluado.perfiles_operativos?.nombre || 'Sin perfil'}</span>
             <p>{selectedEvaluado.cargo_especifico || selectedEvaluado.cargo || 'Cargo no definido'} · {selectedEvaluado.unidad || selectedEvaluado.campana || 'Unidad no definida'}</p>
           </div>
@@ -100,16 +100,16 @@ export default function AssignEvaluation() {
         <div className="guided-step">
           <span>02</span>
           <label>
-            Seleccionar evaluacion compatible
+            Seleccionar evaluación compatible
             <select name="evaluacion_id" value={values.evaluacion_id} onChange={handleChange} disabled={!values.evaluado_id || catalogs.loading || catalogs.evaluaciones.length === 0}>
-              <option value="">Seleccionar evaluacion</option>
+              <option value="">Seleccionar evaluación</option>
               {catalogs.evaluaciones.map((evaluacion) => (
                 <option key={evaluacion.id} value={evaluacion.id}>
                   {evaluacion.nombre}
                 </option>
               ))}
             </select>
-            {values.evaluado_id && catalogs.evaluaciones.length === 0 ? <small className="field-error">No existen evaluaciones activas para el area y perfil seleccionado. Solicita al administrador crear o asociar una evaluacion.</small> : null}
+            {values.evaluado_id && catalogs.evaluaciones.length === 0 ? <small className="field-error">No existen evaluaciones activas para este perfil.</small> : null}
             {errors.evaluacion_id ? <small className="field-error">{errors.evaluacion_id}</small> : null}
           </label>
         </div>
@@ -117,7 +117,7 @@ export default function AssignEvaluation() {
         <div className="guided-step">
           <span>03</span>
           <label>
-            Definir fecha limite
+            Definir fecha límite
             <input name="fecha_limite" type="datetime-local" value={values.fecha_limite} onChange={handleChange} />
             {errors.fecha_limite ? <small className="field-error">{errors.fecha_limite}</small> : null}
           </label>
@@ -127,7 +127,7 @@ export default function AssignEvaluation() {
           <span>04</span>
           <label className="check-row">
             <input name="enviar" type="checkbox" checked={values.enviar} onChange={handleChange} />
-            Enviar invitacion por correo y generar token unico
+            Enviar invitación por correo y generar token único
           </label>
         </div>
 
@@ -135,7 +135,7 @@ export default function AssignEvaluation() {
         {status.error ? <p className="alert error">{status.error}</p> : null}
 
         <button className="primary-button" type="submit" disabled={status.saving || (values.evaluado_id && catalogs.evaluaciones.length === 0)}>
-          {status.saving ? 'Creando...' : 'Crear asignacion'}
+          {status.saving ? 'Creando...' : 'Asignar evaluación'}
         </button>
       </form>
     </section>

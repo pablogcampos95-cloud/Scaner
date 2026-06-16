@@ -74,9 +74,9 @@ export default function Results() {
         <div className="result-hero">
           <Logo size="lg" showText={false} className="result-hero-logo" />
           <div>
-            <span className="eyebrow">Informe individual</span>
+            <span className="eyebrow">Resultado ScanerIA</span>
             <h1>{result.evaluados?.nombre_completo || 'Evaluado'}</h1>
-            <p>Resultado final del diagnóstico de competencias operativas y comerciales.</p>
+            <p>Evaluación de competencias operativas, comerciales y digitales.</p>
           </div>
           <ResultBadge result={result.resultado_final} />
         </div>
@@ -108,9 +108,9 @@ export default function Results() {
         </div>
 
         <section className="plain-section">
-          <h2>Diagnóstico automático</h2>
+          <h2>Brechas detectadas</h2>
           <p>{result.diagnostico}</p>
-          <h2>Recomendación de capacitación</h2>
+          <h2>Recomendación breve</h2>
           <p>{result.recomendacion}</p>
           <div className="ai-suggestion-box">
             <span className="eyebrow">Sugerencia IA</span>
@@ -172,7 +172,7 @@ export default function Results() {
         <div>
           <Logo size="sm" showText={false} />
           <span className="eyebrow">Resultados</span>
-          <h1>Informes de evaluación</h1>
+          <h1>Resultados ScanerIA</h1>
         </div>
       </div>
       {state.error ? <p className="alert error">{state.error}</p> : null}

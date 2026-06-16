@@ -52,8 +52,8 @@ export default function Navbar({ profile }) {
         </nav>
 
         <div className="sidebar-footer">
-          <span>Operación BPO</span>
-          <strong>Diagnóstico IA</strong>
+          <span>Assessment BPO</span>
+          <strong>ScanerIA</strong>
         </div>
       </aside>
 

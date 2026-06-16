@@ -51,9 +51,10 @@ export default function Login() {
       <section className="login-panel">
         <div className="login-copy">
           <Logo size="lg" showText={false} className="login-hero-logo" />
-          <span className="eyebrow">LMS operativo con enfoque IA</span>
-          <h1>Diagnóstico de Competencias</h1>
-          <p>Validación operativa, comercial y digital para equipos BPO, contact center, ventas y back office.</p>
+          <span className="eyebrow">ASSESSMENT OPERATIVO CON ENFOQUE IA</span>
+          <h1>ScanerIA</h1>
+          <h2>Evaluación inteligente de competencias</h2>
+          <p>Evalúa perfiles BPO con precisión, trazabilidad y apoyo de IA.</p>
         </div>
 
         <form className="form-card login-form" onSubmit={handleSubmit}>
@@ -77,11 +78,11 @@ export default function Login() {
           </label>
           {status.message ? <p className="alert error">{status.message}</p> : null}
           <button className="primary-button" type="submit" disabled={status.submitting}>
-            {status.submitting ? 'Validando...' : 'Ingresar'}
+            {status.submitting ? 'Validando...' : 'Iniciar sesión'}
           </button>
           <p className="demo-note">
             {isSupabaseConfigured
-              ? 'Usa un usuario creado en Supabase Auth y registrado en la tabla profiles.'
+              ? 'Accede con tus credenciales autorizadas.'
               : 'Modo local: admin@demo.com o supervisor@demo.com con cualquier contraseña.'}
           </p>
         </form>

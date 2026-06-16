@@ -66,12 +66,12 @@ export default function DashboardAdmin() {
         <div>
           <Logo size="sm" showText={false} />
           <span className="eyebrow">Administrador</span>
-          <h1>Controla el diagnóstico de competencias de tu operación</h1>
-          <p>Visualiza resultados, brechas y avances de tus evaluaciones comerciales, operativas y de contact center.</p>
+          <h1>Control de evaluaciones</h1>
+          <p>Gestiona diagnósticos, perfiles, resultados y brechas por área operativa.</p>
         </div>
         <div className="hero-actions">
           <Link className="primary-button compact" to="/resultados">Ver resultados</Link>
-          <button className="secondary-button" type="button">Gestionar evaluaciones</button>
+          <Link className="secondary-button" to="/admin/evaluaciones">Gestionar evaluaciones</Link>
         </div>
       </div>
 
@@ -80,14 +80,14 @@ export default function DashboardAdmin() {
       <div className="metrics-grid">
         <MetricCard title="Total evaluados" value={new Set(rows.map((row) => row.evaluado_id)).size} />
         <MetricCard title="Evaluaciones asignadas" value={assigned} />
-        <MetricCard title="Completadas" value={completed} tone="success" />
-        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
-        <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
-        <MetricCard title="Promedio general" value={formatPercent(average)} />
+        <MetricCard title="Diagnósticos completados" value={completed} tone="success" />
+        <MetricCard title="Evaluaciones pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
+        <MetricCard title="Evaluaciones vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
+        <MetricCard title="Puntaje promedio" value={formatPercent(average)} />
         <MetricCard title="Aptos" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO).length} tone="success" />
         <MetricCard title="Aptos con refuerzo" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO_REFUERZO).length} tone="warning" />
         <MetricCard title="No aptos temporales" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.NO_APTO).length} tone="danger" />
-        <MetricCard title="Areas con evaluados" value={new Set(rows.map((row) => row.evaluados?.area_id).filter(Boolean)).size} />
+        <MetricCard title="Áreas con evaluados" value={new Set(rows.map((row) => row.evaluados?.area_id).filter(Boolean)).size} />
         <MetricCard title="Perfiles con evaluados" value={new Set(rows.map((row) => row.evaluados?.perfil_operativo_id).filter(Boolean)).size} />
       </div>
 

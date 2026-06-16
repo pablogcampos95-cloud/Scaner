@@ -72,7 +72,7 @@ export default function RegisterEvaluado() {
         <div>
           <span className="eyebrow">Registro operativo</span>
           <h1>Registrar evaluado</h1>
-          <p>Ingresa los datos del colaborador, postulante o asesor a diagnosticar.</p>
+          <p>Crea el perfil que será evaluado.</p>
         </div>
       </div>
 

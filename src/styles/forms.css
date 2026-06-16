@@ -1,8 +1,12 @@
 .login-page {
   background:
-    radial-gradient(circle at 20% 20%, rgba(0, 200, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 80% 30%, rgba(24, 119, 255, 0.2), transparent 32%),
+    linear-gradient(90deg, rgba(6, 20, 38, 0.88), rgba(6, 20, 38, 0.74) 48%, rgba(7, 26, 51, 0.82)),
+    radial-gradient(circle at 26% 24%, rgba(0, 200, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 30%, rgba(24, 119, 255, 0.18), transparent 34%),
+    url('/assets/bg-scaneria-ai.jpg'),
     linear-gradient(135deg, #061426, #071a33 48%, #061426);
+  background-position: center;
+  background-size: cover;
   display: grid;
   min-height: 100vh;
   place-items: center;
@@ -29,8 +33,14 @@
 .login-copy h1 {
   font-size: 56px;
   line-height: 1.02;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   max-width: 760px;
+}
+
+.login-copy h2 {
+  color: var(--text-main);
+  font-size: 28px;
+  margin: 0 0 14px;
 }
 
 .login-copy p {
@@ -51,7 +61,12 @@
 }
 
 .login-form {
-  padding: 28px;
+  backdrop-filter: blur(18px);
+  background:
+    linear-gradient(180deg, rgba(16, 33, 63, 0.84), rgba(7, 26, 51, 0.88));
+  border-color: rgba(0, 200, 255, 0.42);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.36), 0 0 36px rgba(0, 200, 255, 0.12);
+  padding: 30px;
 }
 
 .login-form-logo {

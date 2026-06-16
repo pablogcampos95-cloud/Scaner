@@ -52,7 +52,7 @@ export default function EvaluationPublic() {
     if (hasDynamicQuestions) {
       const sections = state.evaluation?.sections?.length
         ? state.evaluation.sections
-        : [{ id: 'general', nombre: 'Diagnóstico dinámico', descripcion: '' }];
+        : [{ id: 'general', nombre: 'Evaluación dinámica', descripcion: '' }];
       return sections.map((section) => ({
         key: section.id,
         label: section.nombre,
@@ -152,14 +152,13 @@ export default function EvaluationPublic() {
           <div>
             <Logo size="md" showText={false} />
             <span className="eyebrow">Evaluación pública</span>
-            <h1>Diagnóstico de Competencias Operativas y Comerciales</h1>
-            <p>
-              Esta evaluación permitirá validar conocimientos clave para el desempeño en entornos comerciales, BPO, contact center y back office.
-            </p>
+            <h1>ScanerIA</h1>
+            <h2>Evaluación inteligente de competencias</h2>
+            <p>Responde de forma individual. Tus respuestas serán usadas para diagnóstico y seguimiento interno.</p>
           </div>
           <div className="identity-box">
             <strong>{evaluado?.nombre_completo}</strong>
-            <span>{state.assignment.evaluaciones?.nombre || 'Diagnóstico asignado'}</span>
+            <span>{state.assignment.evaluaciones?.nombre || 'Evaluación asignada'}</span>
             <span>Límite: {formatDate(state.assignment.fecha_limite)}</span>
           </div>
         </div>
@@ -173,17 +172,17 @@ export default function EvaluationPublic() {
               <span>KPIs</span>
             </div>
             <p className="confidential-note">
-              Responde de manera individual y honesta. Los resultados serán utilizados con fines de diagnóstico, formación y seguimiento interno.
+              Tus respuestas serán tratadas con fines de evaluación, trazabilidad y seguimiento interno.
             </p>
             <button className="primary-button" type="button" onClick={startEvaluation}>
-              Iniciar diagnóstico
+              Iniciar evaluación
             </button>
           </div>
         ) : (
           <form className="questions-flow" onSubmit={(event) => event.preventDefault()}>
             <div className="progress-card">
               <div>
-              <span>Avance del diagnóstico</span>
+                <span>Progreso de evaluación</span>
                 <strong>{answeredCount} / {totalQuestions}</strong>
               </div>
               <div className="progress-track">
@@ -241,7 +240,7 @@ export default function EvaluationPublic() {
                 </button>
               ) : (
                 <button className="primary-button" type="button" onClick={finishEvaluation} disabled={state.saving}>
-                  {state.saving ? 'Guardando resultado...' : 'Finalizar diagnóstico'}
+                  {state.saving ? 'Guardando resultado...' : 'Finalizar evaluación'}
                 </button>
               )}
             </div>

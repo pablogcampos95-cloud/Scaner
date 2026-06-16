@@ -12,14 +12,14 @@ export default function Logo({ size = 'md', showText = true, className = '' }) {
   return (
     <div className={`logo ${sizeClass[size] || sizeClass.md} ${className}`}>
       {!failed ? (
-        <img src="/assets/logo.png" alt="IA Learning Solutions" onError={() => setFailed(true)} />
+        <img src="/assets/logo.png" alt="ScanerIA" onError={() => setFailed(true)} />
       ) : (
-        <span className="logo-fallback">Diagnóstico Comercial</span>
+        <span className="logo-fallback">ScanerIA</span>
       )}
       {showText ? (
         <span className="logo-copy">
-          <strong>Diagnóstico Comercial</strong>
-          <small>Competencias Operativas</small>
+          <strong>ScanerIA</strong>
+          <small>Assessment BPO</small>
         </span>
       ) : null}
     </div>
