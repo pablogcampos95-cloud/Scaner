@@ -3,7 +3,9 @@ import { Link, useOutletContext, useParams } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
+import { getResponsesByAsignacion } from '../services/respuestasService.js';
 import { getResultadoById, listResultados } from '../services/resultadosService.js';
+import { getAudioSignedUrl } from '../services/storageService.js';
 import { MODULES } from '../utils/constants.js';
 import { formatDateTime, formatPercent } from '../utils/formatters.js';
 import { getLevelByScore } from '../utils/scoreCalculator.js';
@@ -11,10 +13,19 @@ import { getLevelByScore } from '../utils/scoreCalculator.js';
 export default function Results() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ rows: [], selected: null, loading: true, error: '' });
+  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '' });
 
   useEffect(() => {
-    const loader = id ? getResultadoById(id, profile).then((selected) => ({ rows: [], selected })) : listResultados(profile).then((rows) => ({ rows, selected: null }));
+    const loader = id
+      ? getResultadoById(id, profile).then(async (selected) => {
+          const rawResponses = selected ? await getResponsesByAsignacion(selected.asignacion_id) : [];
+          const responses = await Promise.all(rawResponses.map(async (response) => ({
+            ...response,
+            playableAudioUrl: response.audio_path ? await getAudioSignedUrl(response.audio_path) : response.audio_url,
+          })));
+          return { rows: [], selected, responses };
+        })
+      : listResultados(profile).then((rows) => ({ rows, selected: null, responses: [] }));
 
     loader
       .then((payload) => setState({ ...payload, loading: false, error: '' }))
@@ -70,10 +81,35 @@ export default function Results() {
           <p>{result.diagnostico}</p>
           <h2>Recomendación de capacitación</h2>
           <p>{result.recomendacion}</p>
+          {state.responses.some((response) => response.requires_review) ? (
+            <Link className="primary-button compact" to={`/resultados/${result.asignacion_id}/revision`}>
+              Revisar respuestas pendientes
+            </Link>
+          ) : null}
           <Link className="secondary-button compact" to={profile.role === 'admin' ? '/admin' : '/supervisor'}>
             Volver al dashboard
           </Link>
         </section>
+
+        {state.responses.length ? (
+          <section className="plain-section">
+            <h2>Respuestas por pregunta</h2>
+            <div className="responses-list">
+              {state.responses.map((response) => (
+                <article className="response-card" key={response.id}>
+                  <div>
+                    <strong>{response.questions?.titulo || 'Pregunta'}</strong>
+                    <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
+                  </div>
+                  {response.answer_text ? <p>{response.answer_text}</p> : null}
+                  {response.playableAudioUrl ? <audio controls src={response.playableAudioUrl} /> : null}
+                  {response.answer_json ? <pre>{JSON.stringify(response.answer_json, null, 2)}</pre> : null}
+                  <small>Puntaje: {response.score_obtained} / {response.max_score}</small>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </section>
     );
   }

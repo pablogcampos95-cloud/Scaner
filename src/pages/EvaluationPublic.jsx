@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loading from '../components/Loading.jsx';
 import Logo from '../components/Logo.jsx';
+import QuestionRenderer from '../components/evaluation-runner/QuestionRenderer.jsx';
 import { getAsignacionByToken, updateAsignacion } from '../services/asignacionesService.js';
+import { getPublicEvaluationByToken } from '../services/evaluacionesService.js';
+import { saveDynamicEvaluationResponses } from '../services/respuestasService.js';
 import { completePublicEvaluation, getResultadoByAssignment } from '../services/resultadosService.js';
 import defaultQuestions from '../data/defaultQuestions.js';
 import { ASSIGNMENT_STATUS, MODULES } from '../utils/constants.js';
@@ -12,36 +15,59 @@ import { calculateScores } from '../utils/scoreCalculator.js';
 export default function EvaluationPublic() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const [state, setState] = useState({ assignment: null, loading: true, error: '', started: false, saving: false });
+  const [state, setState] = useState({ assignment: null, evaluation: null, scoringEvaluation: null, loading: true, error: '', started: false, saving: false });
   const [answers, setAnswers] = useState({});
   const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
 
   useEffect(() => {
-    getAsignacionByToken(token)
-      .then(async (assignment) => {
+    getPublicEvaluationByToken(token)
+      .then(async ({ assignment, evaluation, scoringEvaluation }) => {
         const existingResult = await getResultadoByAssignment(assignment.id);
         if (existingResult || assignment.estado === ASSIGNMENT_STATUS.COMPLETADA) {
-          setState({ assignment, loading: false, error: 'Esta evaluación ya fue completada.', started: false, saving: false });
+          setState({ assignment, evaluation, scoringEvaluation, loading: false, error: 'Esta evaluación ya fue completada.', started: false, saving: false });
           return;
         }
         if (assignment.estado === ASSIGNMENT_STATUS.VENCIDA) {
-          setState({ assignment, loading: false, error: 'El enlace de evaluación está vencido.', started: false, saving: false });
+          setState({ assignment, evaluation, scoringEvaluation, loading: false, error: 'El enlace de evaluación está vencido.', started: false, saving: false });
           return;
         }
-        setState({ assignment, loading: false, error: '', started: assignment.estado === ASSIGNMENT_STATUS.EN_PROCESO, saving: false });
+        setState({ assignment, evaluation, scoringEvaluation, loading: false, error: '', started: assignment.estado === ASSIGNMENT_STATUS.EN_PROCESO, saving: false });
       })
-      .catch((error) => setState({ assignment: null, loading: false, error: error.message, started: false, saving: false }));
+      .catch(async () => {
+        try {
+          const assignment = await getAsignacionByToken(token);
+          setState({ assignment, evaluation: null, scoringEvaluation: null, loading: false, error: '', started: assignment.estado === ASSIGNMENT_STATUS.EN_PROCESO, saving: false });
+        } catch (error) {
+          setState({ assignment: null, evaluation: null, scoringEvaluation: null, loading: false, error: error.message, started: false, saving: false });
+        }
+      });
   }, [token]);
 
+  const dynamicQuestions = state.evaluation?.questions || [];
+  const hasDynamicQuestions = dynamicQuestions.length > 0;
+  const activeQuestions = hasDynamicQuestions ? dynamicQuestions : defaultQuestions;
+  const totalQuestions = activeQuestions.length;
+
   const groupedQuestions = useMemo(() => {
+    if (hasDynamicQuestions) {
+      const sections = state.evaluation?.sections?.length
+        ? state.evaluation.sections
+        : [{ id: 'general', nombre: 'Diagnóstico dinámico', descripcion: '' }];
+      return sections.map((section) => ({
+        key: section.id,
+        label: section.nombre,
+        questions: dynamicQuestions.filter((question) => (question.section_id || 'general') === section.id || (!question.section_id && section.id === 'general')),
+      })).filter((section) => section.questions.length > 0);
+    }
+
     return MODULES.map((module) => ({
       ...module,
       questions: defaultQuestions.filter((question) => question.module === module.key),
     }));
-  }, []);
+  }, [dynamicQuestions, hasDynamicQuestions, state.evaluation]);
 
   const answeredCount = Object.keys(answers).length;
-  const progress = Math.round((answeredCount / defaultQuestions.length) * 100);
+  const progress = Math.round((answeredCount / totalQuestions) * 100);
   const currentModule = groupedQuestions[currentModuleIndex];
   const isLastModule = currentModuleIndex === groupedQuestions.length - 1;
 
@@ -62,13 +88,23 @@ export default function EvaluationPublic() {
   };
 
   const finishEvaluation = async () => {
-    if (Object.keys(answers).length !== defaultQuestions.length) {
+    if (Object.keys(answers).length !== totalQuestions) {
       setState((prev) => ({ ...prev, error: 'Responde todas las preguntas antes de finalizar.' }));
       return;
     }
 
     setState((prev) => ({ ...prev, saving: true, error: '' }));
     try {
+      if (hasDynamicQuestions) {
+        await saveDynamicEvaluationResponses({
+          assignment: state.assignment,
+          evaluation: state.scoringEvaluation || state.evaluation,
+          answers,
+        });
+        navigate('/evaluacion-completada', { replace: true });
+        return;
+      }
+
       const scores = calculateScores(defaultQuestions, answers);
       await completePublicEvaluation({
         asignacion_id: state.assignment.id,
@@ -143,8 +179,8 @@ export default function EvaluationPublic() {
           <form className="questions-flow" onSubmit={(event) => event.preventDefault()}>
             <div className="progress-card">
               <div>
-                <span>Avance del diagnóstico</span>
-                <strong>{answeredCount} / {defaultQuestions.length}</strong>
+              <span>Avance del diagnóstico</span>
+                <strong>{answeredCount} / {totalQuestions}</strong>
               </div>
               <div className="progress-track">
                 <span style={{ width: `${progress}%` }} />
@@ -162,18 +198,22 @@ export default function EvaluationPublic() {
                   <legend>
                     {index + 1}. {question.question}
                   </legend>
-                  {question.options.map((option) => (
-                    <label className="option-row" key={option}>
-                      <input
-                        type="radio"
-                        name={question.id}
-                        value={option}
-                        checked={answers[question.id] === option}
-                        onChange={() => handleAnswer(question.id, option)}
-                      />
-                      {option}
-                    </label>
-                  ))}
+                  {hasDynamicQuestions ? (
+                    <QuestionRenderer question={question} value={answers[question.id]} onChange={(value) => handleAnswer(question.id, value)} />
+                  ) : (
+                    question.options.map((option) => (
+                      <label className="option-row" key={option}>
+                        <input
+                          type="radio"
+                          name={question.id}
+                          value={option}
+                          checked={answers[question.id] === option}
+                          onChange={() => handleAnswer(question.id, option)}
+                        />
+                        {option}
+                      </label>
+                    ))
+                  )}
                 </fieldset>
               ))}
             </section>

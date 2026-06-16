@@ -3,12 +3,14 @@ import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import RoleRoute from './components/RoleRoute.jsx';
 import AssignEvaluation from './pages/AssignEvaluation.jsx';
+import AdminEvaluations from './pages/AdminEvaluations.jsx';
 import DashboardAdmin from './pages/DashboardAdmin.jsx';
 import DashboardSupervisor from './pages/DashboardSupervisor.jsx';
 import Evaluados from './pages/Evaluados.jsx';
 import EvaluationCompleted from './pages/EvaluationCompleted.jsx';
 import EvaluationPublic from './pages/EvaluationPublic.jsx';
 import Login from './pages/Login.jsx';
+import ManualReview from './pages/ManualReview.jsx';
 import NotFound from './pages/NotFound.jsx';
 import RegisterEvaluado from './pages/RegisterEvaluado.jsx';
 import Results from './pages/Results.jsx';
@@ -25,6 +27,10 @@ export default function App() {
         <Route element={<Layout />}>
           <Route element={<RoleRoute allowedRoles={['admin']} />}>
             <Route path="/admin" element={<DashboardAdmin />} />
+            <Route path="/admin/evaluaciones" element={<AdminEvaluations />} />
+            <Route path="/admin/evaluaciones/nueva" element={<AdminEvaluations mode="new" />} />
+            <Route path="/admin/evaluaciones/:id/editar" element={<AdminEvaluations mode="edit" />} />
+            <Route path="/admin/evaluaciones/:id/preguntas" element={<AdminEvaluations mode="questions" />} />
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['supervisor']} />}>
@@ -36,6 +42,7 @@ export default function App() {
           <Route path="/evaluados" element={<Evaluados />} />
           <Route path="/resultados" element={<Results />} />
           <Route path="/resultados/:id" element={<Results />} />
+          <Route path="/resultados/:id/revision" element={<ManualReview />} />
         </Route>
       </Route>
 

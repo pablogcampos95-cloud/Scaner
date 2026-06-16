@@ -174,6 +174,70 @@
   width: 18px;
 }
 
+.runner-question {
+  display: grid;
+  gap: 10px;
+}
+
+.audio-recorder {
+  display: grid;
+  gap: 12px;
+}
+
+.audio-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.audio-controls button {
+  gap: 8px;
+}
+
+.audio-recorder audio {
+  width: 100%;
+}
+
+.mini-sheet {
+  display: grid;
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.sheet-grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: 42px repeat(5, minmax(90px, 1fr));
+  min-width: 560px;
+}
+
+.sheet-grid strong,
+.sheet-corner {
+  align-items: center;
+  background: rgba(0, 200, 255, 0.1);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  border-radius: 8px;
+  color: var(--primary);
+  display: flex;
+  font-size: 13px;
+  justify-content: center;
+}
+
+.sheet-grid input {
+  min-height: 38px;
+  padding: 6px 8px;
+}
+
+.target-cell {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.12);
+}
+
+.sheet-result {
+  color: var(--text-muted);
+}
+
 .evaluation-actions {
   display: flex;
   gap: 12px;
@@ -190,6 +254,35 @@
 
 .completion-panel p {
   color: var(--text-muted);
+}
+
+.responses-list {
+  display: grid;
+  gap: 12px;
+}
+
+.response-card {
+  background: rgba(6, 20, 38, 0.54);
+  border: 1px solid rgba(30, 78, 120, 0.72);
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.response-card > div {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.response-card pre {
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 10px;
+  color: var(--text-muted);
+  overflow-x: auto;
+  padding: 12px;
 }
 
 @media (max-width: 760px) {

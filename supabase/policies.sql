@@ -5,6 +5,11 @@ alter table public.asignaciones enable row level security;
 alter table public.resultados enable row level security;
 alter table public.correos_enviados enable row level security;
 alter table public.logs_actividad enable row level security;
+alter table public.evaluation_sections enable row level security;
+alter table public.questions enable row level security;
+alter table public.question_options enable row level security;
+alter table public.evaluation_responses enable row level security;
+alter table public.manual_reviews enable row level security;
 
 create or replace function public.current_profile_role()
 returns text
@@ -40,10 +45,69 @@ on public.evaluaciones for select
 to authenticated
 using (true);
 
+create policy "admin_insert_evaluaciones"
+on public.evaluaciones for insert
+to authenticated
+with check (public.current_profile_role() = 'admin');
+
+create policy "admin_update_evaluaciones"
+on public.evaluaciones for update
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
 create policy "public_select_active_evaluaciones"
 on public.evaluaciones for select
 to anon
 using (estado = 'activa');
+
+create policy "admin_manage_sections"
+on public.evaluation_sections for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_sections"
+on public.evaluation_sections for select
+to authenticated
+using (true);
+
+create policy "public_read_sections"
+on public.evaluation_sections for select
+to anon
+using (true);
+
+create policy "admin_manage_questions"
+on public.questions for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_questions"
+on public.questions for select
+to authenticated
+using (true);
+
+create policy "public_read_questions"
+on public.questions for select
+to anon
+using (estado = 'activa');
+
+create policy "admin_manage_question_options"
+on public.question_options for all
+to authenticated
+using (public.current_profile_role() = 'admin')
+with check (public.current_profile_role() = 'admin');
+
+create policy "authenticated_read_question_options"
+on public.question_options for select
+to authenticated
+using (true);
+
+create policy "public_read_question_options"
+on public.question_options for select
+to anon
+using (true);
 
 create policy "admin_select_all_asignaciones"
 on public.asignaciones for select
@@ -113,6 +177,69 @@ create policy "public_insert_result_once"
 on public.resultados for insert
 to anon
 with check (true);
+
+create policy "public_insert_evaluation_responses"
+on public.evaluation_responses for insert
+to anon
+with check (true);
+
+create policy "admin_select_all_responses"
+on public.evaluation_responses for select
+to authenticated
+using (public.current_profile_role() = 'admin');
+
+create policy "supervisor_select_own_responses"
+on public.evaluation_responses for select
+to authenticated
+using (
+  exists (
+    select 1 from public.asignaciones a
+    where a.id = evaluation_responses.asignacion_id
+    and a.supervisor_id = auth.uid()
+  )
+);
+
+create policy "reviewer_update_responses"
+on public.evaluation_responses for update
+to authenticated
+using (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1 from public.asignaciones a
+    where a.id = evaluation_responses.asignacion_id
+    and a.supervisor_id = auth.uid()
+  )
+)
+with check (true);
+
+create policy "reviewer_insert_manual_reviews"
+on public.manual_reviews for insert
+to authenticated
+with check (
+  public.current_profile_role() = 'admin'
+  or exists (
+    select 1
+    from public.evaluation_responses er
+    join public.asignaciones a on a.id = er.asignacion_id
+    where er.id = manual_reviews.response_id
+    and a.supervisor_id = auth.uid()
+  )
+);
+
+create policy "reviewer_select_manual_reviews"
+on public.manual_reviews for select
+to authenticated
+using (public.current_profile_role() = 'admin' or reviewer_id = auth.uid());
+
+create policy "public_upload_audio_responses"
+on storage.objects for insert
+to anon
+with check (bucket_id = 'audio-responses');
+
+create policy "authenticated_read_audio_responses"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'audio-responses');
 
 create policy "no_result_updates_for_authenticated"
 on public.resultados for update

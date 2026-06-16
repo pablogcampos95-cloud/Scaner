@@ -74,3 +74,79 @@ export function calculateScores(questions, answers) {
     detail,
   };
 }
+
+export function calculateQuestionScore(question, answer) {
+  const maxScore = Number(question?.puntaje || 0);
+  const type = question?.question_type;
+  const correctAnswer = question?.correct_answer;
+  const settings = question?.settings || {};
+
+  if (!question) return { scoreObtained: 0, maxScore: 0, isCorrect: null, requiresReview: true };
+
+  if (type === 'single_choice') {
+    const expected = correctAnswer?.option_id || correctAnswer?.value;
+    const isCorrect = answer === expected;
+    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: false };
+  }
+
+  if (type === 'multiple_choice') {
+    const expected = [...(correctAnswer?.option_ids || correctAnswer?.values || [])].sort();
+    const received = [...(Array.isArray(answer) ? answer : [])].sort();
+    const isCorrect = JSON.stringify(expected) === JSON.stringify(received);
+    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: false };
+  }
+
+  if (type === 'short_text') {
+    const text = String(answer || '').trim().toLowerCase();
+    const keywords = correctAnswer?.keywords || settings.keywords || [];
+    if (!keywords.length) return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
+    const isCorrect = keywords.every((keyword) => text.includes(String(keyword).toLowerCase()));
+    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: false };
+  }
+
+  if (type === 'long_text' || type === 'audio_response') {
+    return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
+  }
+
+  if (type === 'spreadsheet') {
+    const expected = String(settings.expectedValue ?? correctAnswer?.expectedValue ?? '').trim();
+    const result = String(answer?.result ?? answer?.calculatedResult ?? '').trim();
+    if (!expected) return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
+    const isCorrect = expected === result;
+    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: !isCorrect && Boolean(settings.reviewOnMismatch) };
+  }
+
+  if (type === 'kpi_numeric') {
+    const expected = Number(correctAnswer?.expected ?? settings.expected);
+    const tolerance = Number(settings.tolerance ?? correctAnswer?.tolerance ?? 0);
+    const received = Number(answer?.value ?? answer);
+    const isCorrect = Number.isFinite(received) && Math.abs(received - expected) <= tolerance;
+    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: false };
+  }
+
+  return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
+}
+
+export function summarizeDynamicResult(questions, responses) {
+  const scoreObtained = responses.reduce((sum, response) => sum + Number(response.score_obtained || 0), 0);
+  const maxScore = responses.reduce((sum, response) => sum + Number(response.max_score || 0), 0)
+    || questions.reduce((sum, question) => sum + Number(question.puntaje || 0), 0);
+  const pendingReviews = responses.filter((response) => response.requires_review).length;
+  const percentage = maxScore ? Math.round((scoreObtained / maxScore) * 100) : 0;
+  const finalResult = getFinalResult(percentage);
+
+  return {
+    score_obtained: scoreObtained,
+    max_score: maxScore,
+    porcentaje_general: percentage,
+    pending_reviews: pendingReviews,
+    estado_resultado: pendingReviews > 0 ? 'pendiente_revision' : 'completo',
+    resultado_final: finalResult,
+    diagnostico: pendingReviews > 0
+      ? 'El diagnóstico contiene respuestas que requieren revisión manual antes de emitir un resultado final.'
+      : `El evaluado alcanzó ${percentage}% en la evaluación dinámica.`,
+    recomendacion: pendingReviews > 0
+      ? 'Completar la revisión manual de respuestas abiertas, audio o rúbricas para consolidar el resultado.'
+      : 'Revisar el detalle por pregunta para definir acciones de refuerzo o habilitación.',
+  };
+}

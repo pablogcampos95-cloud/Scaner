@@ -28,10 +28,18 @@ create table if not exists public.evaluaciones (
   id uuid primary key default gen_random_uuid(),
   nombre text not null,
   descripcion text,
+  objetivo text,
   estado text not null default 'activa',
-  puntaje_aprobacion numeric not null default 80,
+  puntaje_aprobacion numeric not null default 60,
+  tiempo_limite_minutos integer,
+  created_by uuid references public.profiles(id),
   created_at timestamp with time zone not null default now()
 );
+
+alter table public.evaluaciones add column if not exists objetivo text;
+alter table public.evaluaciones add column if not exists tiempo_limite_minutos integer;
+alter table public.evaluaciones add column if not exists created_by uuid references public.profiles(id);
+alter table public.evaluaciones add column if not exists updated_at timestamp with time zone default now();
 
 create table if not exists public.asignaciones (
   id uuid primary key default gen_random_uuid(),
@@ -62,6 +70,83 @@ create table if not exists public.resultados (
   recomendacion text,
   created_at timestamp with time zone not null default now()
 );
+
+alter table public.resultados add column if not exists estado_resultado text default 'completo';
+alter table public.resultados add column if not exists score_obtained numeric default 0;
+alter table public.resultados add column if not exists max_score numeric default 0;
+alter table public.resultados add column if not exists pending_reviews integer default 0;
+
+create table if not exists public.evaluation_sections (
+  id uuid primary key default gen_random_uuid(),
+  evaluacion_id uuid references public.evaluaciones(id) on delete cascade,
+  nombre text not null,
+  descripcion text,
+  orden integer default 1,
+  created_at timestamp with time zone not null default now()
+);
+
+create table if not exists public.questions (
+  id uuid primary key default gen_random_uuid(),
+  evaluacion_id uuid references public.evaluaciones(id) on delete cascade,
+  section_id uuid references public.evaluation_sections(id) on delete set null,
+  question_type text not null check (question_type in ('single_choice', 'multiple_choice', 'short_text', 'long_text', 'audio_response', 'spreadsheet', 'kpi_numeric')),
+  titulo text not null,
+  descripcion text,
+  instrucciones text,
+  puntaje numeric default 1,
+  orden integer default 1,
+  required boolean default true,
+  scoring_mode text default 'auto' check (scoring_mode in ('auto', 'manual', 'rubric', 'mixed')),
+  correct_answer jsonb,
+  settings jsonb,
+  rubric jsonb,
+  estado text default 'activa',
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create table if not exists public.question_options (
+  id uuid primary key default gen_random_uuid(),
+  question_id uuid references public.questions(id) on delete cascade,
+  option_text text not null,
+  is_correct boolean default false,
+  orden integer default 1,
+  created_at timestamp with time zone not null default now()
+);
+
+create table if not exists public.evaluation_responses (
+  id uuid primary key default gen_random_uuid(),
+  asignacion_id uuid references public.asignaciones(id) on delete cascade,
+  question_id uuid references public.questions(id) on delete cascade,
+  evaluado_id uuid references public.evaluados(id),
+  answer_type text,
+  answer_text text,
+  answer_json jsonb,
+  audio_path text,
+  audio_url text,
+  is_correct boolean,
+  score_obtained numeric default 0,
+  max_score numeric default 0,
+  requires_review boolean default false,
+  reviewed_by uuid references public.profiles(id),
+  review_comment text,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create table if not exists public.manual_reviews (
+  id uuid primary key default gen_random_uuid(),
+  response_id uuid references public.evaluation_responses(id) on delete cascade,
+  reviewer_id uuid references public.profiles(id),
+  score numeric,
+  comment text,
+  rubric_result jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+insert into storage.buckets (id, name, public)
+values ('audio-responses', 'audio-responses', false)
+on conflict (id) do nothing;
 
 create table if not exists public.correos_enviados (
   id uuid primary key default gen_random_uuid(),
