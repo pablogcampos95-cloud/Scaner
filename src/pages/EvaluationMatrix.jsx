@@ -5,6 +5,7 @@ import { evaluationAppliesTo, getEvaluacionesActivas } from '../services/evaluac
 
 export default function EvaluationMatrix() {
   const [state, setState] = useState({ areas: [], perfiles: [], evaluaciones: [], loading: true, error: '' });
+  const [selectedCell, setSelectedCell] = useState(null);
 
   useEffect(() => {
     Promise.all([getAreasActivas(), getPerfilesOperativosActivos(), getEvaluacionesActivas()])
@@ -53,12 +54,12 @@ export default function EvaluationMatrix() {
                   const rows = coverage[`${perfil.id}:${area.id}`] || [];
                   return (
                     <td key={area.id}>
-                      <strong>{rows.length} activas</strong>
-                      <div className="matrix-list">
-                        {rows.slice(0, 3).map((evaluacion) => <span key={evaluacion.id}>{evaluacion.nombre}</span>)}
-                        {rows.length > 3 ? <small>+{rows.length - 3} más</small> : null}
+                      <div className="matrix-cell-summary">
+                        <strong>{rows.length} activas</strong>
+                        <button className="secondary-button compact" type="button" onClick={() => setSelectedCell({ area, perfil, rows })}>
+                          Ver detalles
+                        </button>
                       </div>
-                      <Link to="/admin/evaluaciones">Ver evaluaciones</Link>
                     </td>
                   );
                 })}
@@ -67,6 +68,27 @@ export default function EvaluationMatrix() {
           </tbody>
         </table>
       </div>
+
+      {selectedCell ? (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <div className="modal-header">
+              <div>
+                <h2>{selectedCell.perfil.nombre} / {selectedCell.area.nombre}</h2>
+                <p>{selectedCell.rows.length} evaluaciones activas asociadas.</p>
+              </div>
+              <button className="modal-close" type="button" onClick={() => setSelectedCell(null)}>×</button>
+            </div>
+            <div className="matrix-list">
+              {selectedCell.rows.length ? selectedCell.rows.map((evaluacion) => <span key={evaluacion.id}>{evaluacion.nombre}</span>) : <span>No hay evaluaciones activas para esta combinación.</span>}
+            </div>
+            <div className="form-actions">
+              <Link className="secondary-button compact" to="/admin/evaluaciones">Ver evaluaciones</Link>
+              <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Crear evaluación</Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

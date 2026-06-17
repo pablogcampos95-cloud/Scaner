@@ -88,6 +88,7 @@ export default function Login() {
           </p>
         </form>
       </section>
+      <span className="brand-watermark">IA Learning Solutions</span>
     </main>
   );
 }

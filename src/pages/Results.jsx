@@ -15,6 +15,8 @@ export default function Results() {
   const { profile } = useOutletContext();
   const { id } = useParams();
   const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiError: '' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({ fecha: '', area: '', perfil: '', estado: '', resultado: '' });
 
   useEffect(() => {
     const loader = id
@@ -163,8 +165,26 @@ export default function Results() {
     { key: 'promedio_general', header: 'Promedio', render: (row) => formatPercent(row.promedio_general) },
     { key: 'resultado_final', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado_final} /> },
     { key: 'created_at', header: 'Finalización', render: (row) => formatDateTime(row.created_at) },
-    { key: 'acciones', header: 'Acciones', render: (row) => <Link to={`/resultados/${row.id}`}>Ver informe</Link> },
+    { key: 'acciones', header: 'Acciones', render: (row) => <div className="table-actions"><Link to={`/resultados/${row.id}`}>Ver informe</Link></div> },
   ];
+
+  const filteredRows = state.rows.filter((row) => {
+    const createdDate = row.created_at?.slice(0, 10);
+    const area = row.evaluados?.areas?.nombre || '';
+    const perfil = row.evaluados?.perfiles_operativos?.nombre || '';
+    const estado = row.asignaciones?.estado || '';
+    return (
+      (!filters.fecha || createdDate === filters.fecha) &&
+      (!filters.area || area === filters.area) &&
+      (!filters.perfil || perfil === filters.perfil) &&
+      (!filters.estado || estado === filters.estado) &&
+      (!filters.resultado || row.resultado_final === filters.resultado)
+    );
+  });
+
+  const areas = [...new Set(state.rows.map((row) => row.evaluados?.areas?.nombre).filter(Boolean))];
+  const perfiles = [...new Set(state.rows.map((row) => row.evaluados?.perfiles_operativos?.nombre).filter(Boolean))];
+  const resultados = [...new Set(state.rows.map((row) => row.resultado_final).filter(Boolean))];
 
   return (
     <section className="page-stack">
@@ -174,9 +194,39 @@ export default function Results() {
           <span className="eyebrow">Resultados</span>
           <h1>Resultados ScanerIA</h1>
         </div>
+        <button className="secondary-button compact" type="button" onClick={() => setShowFilters((value) => !value)}>
+          {showFilters ? 'Ocultar filtros' : 'Filtros'}
+        </button>
       </div>
       {state.error ? <p className="alert error">{state.error}</p> : null}
-      <DataTable columns={columns} rows={state.rows} loading={state.loading} />
+      {showFilters ? (
+        <div className="filters-bar">
+          <input type="date" value={filters.fecha} onChange={(event) => setFilters({ ...filters, fecha: event.target.value })} />
+          <select value={filters.area} onChange={(event) => setFilters({ ...filters, area: event.target.value })}>
+            <option value="">Todas las áreas</option>
+            {areas.map((area) => <option key={area} value={area}>{area}</option>)}
+          </select>
+          <select value={filters.perfil} onChange={(event) => setFilters({ ...filters, perfil: event.target.value })}>
+            <option value="">Todos los perfiles</option>
+            {perfiles.map((perfil) => <option key={perfil} value={perfil}>{perfil}</option>)}
+          </select>
+          <select value={filters.estado} onChange={(event) => setFilters({ ...filters, estado: event.target.value })}>
+            <option value="">Todos los estados</option>
+            <option value="asignada">Asignada</option>
+            <option value="enviada">Enviada</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="completada">Completada</option>
+            <option value="vencida">Vencida</option>
+          </select>
+          <select value={filters.resultado} onChange={(event) => setFilters({ ...filters, resultado: event.target.value })}>
+            <option value="">Todos los resultados</option>
+            {resultados.map((resultado) => <option key={resultado} value={resultado}>{resultado}</option>)}
+          </select>
+          <button className="secondary-button compact" type="button" onClick={() => setFilters({ fecha: '', area: '', perfil: '', estado: '', resultado: '' })}>Limpiar</button>
+        </div>
+      ) : null}
+      <DataTable columns={columns} rows={filteredRows} loading={state.loading} />
     </section>
   );
 }

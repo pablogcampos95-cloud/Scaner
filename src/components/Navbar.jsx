@@ -18,7 +18,7 @@ export default function Navbar({ profile }) {
     { to: homePath, label: 'Dashboard', icon: LayoutDashboard },
     { to: '/evaluados', label: 'Evaluados', icon: Users },
     ...(isAdmin ? [{ to: '/admin/evaluaciones', label: 'Evaluaciones', icon: ListChecks }] : []),
-    ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Catálogos', icon: Library }] : []),
+    ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Áreas y perfiles', icon: Library }] : []),
     ...(isAdmin ? [{ to: '/admin/matriz-evaluaciones', label: 'Matriz de perfiles', icon: Table2 }] : []),
     ...(isAdmin ? [{ to: '/admin/usuarios', label: 'Usuarios', icon: UserCog }] : []),
     ...(!isAdmin ? [{ to: '/asignar-evaluacion', label: 'Asignar evaluación', icon: UserPlus }] : []),

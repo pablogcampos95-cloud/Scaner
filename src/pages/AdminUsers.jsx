@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import DataTable from '../components/DataTable.jsx';
 import { createUser, listUsers, updateUser } from '../services/usersService.js';
-import { ROLE_LABELS, ROLES } from '../utils/roles.js';
 import { formatDate } from '../utils/formatters.js';
+import { ROLE_LABELS, ROLES } from '../utils/roles.js';
 
 const emptyForm = {
   id: '',
@@ -18,6 +18,7 @@ export default function AdminUsers() {
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const load = () => {
     setState((prev) => ({ ...prev, loading: true }));
@@ -38,6 +39,7 @@ export default function AdminUsers() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditing(false);
+    setShowForm(false);
   };
 
   const validate = () => {
@@ -61,11 +63,8 @@ export default function AdminUsers() {
     setState((prev) => ({ ...prev, error: '', success: '' }));
 
     try {
-      if (editing) {
-        await updateUser(form.id, form);
-      } else {
-        await createUser(form);
-      }
+      if (editing) await updateUser(form.id, form);
+      else await createUser(form);
       resetForm();
       const rows = await listUsers();
       setState({ rows, loading: false, error: '', success: editing ? 'Usuario actualizado correctamente.' : 'Usuario creado correctamente.' });
@@ -78,6 +77,7 @@ export default function AdminUsers() {
 
   const handleEdit = (row) => {
     setEditing(true);
+    setShowForm(true);
     setForm({
       id: row.id,
       full_name: row.full_name || '',
@@ -86,7 +86,6 @@ export default function AdminUsers() {
       status: row.status || 'active',
       password: '',
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const columns = [
@@ -118,7 +117,7 @@ export default function AdminUsers() {
           <h1>Gestión de usuarios</h1>
           <p>Crea y administra usuarios internos con acceso a la plataforma según su rol operativo.</p>
         </div>
-        <button className="secondary-button" type="button" onClick={resetForm}>Nuevo usuario</button>
+        <button className="primary-button compact" type="button" onClick={() => { setForm(emptyForm); setEditing(false); setShowForm(true); }}>Nuevo usuario</button>
       </div>
 
       <div className="metrics-grid">
@@ -128,53 +127,37 @@ export default function AdminUsers() {
         <div className="metric-card metric-card--success"><span>Activos</span><strong>{metrics.active}</strong></div>
       </div>
 
-      <form className="form-card" onSubmit={handleSubmit}>
-        <div className="form-title">
-          <div>
-            <h2>{editing ? 'Editar usuario' : 'Crear usuario'}</h2>
-            <p>{editing ? 'Actualiza datos, rol, estado o define una nueva contraseña.' : 'El usuario podrá iniciar sesión con el correo y contraseña asignados.'}</p>
-          </div>
-        </div>
-
-        {state.error ? <p className="alert error">{state.error}</p> : null}
-        {state.success ? <p className="alert success">{state.success}</p> : null}
-
-        <div className="form-grid">
-          <label>
-            Nombre completo
-            <input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} placeholder="Nombre del usuario" />
-          </label>
-          <label>
-            Correo
-            <input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="usuario@empresa.com" />
-          </label>
-          <label>
-            Rol
-            <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>
-              <option value={ROLES.ADMIN}>Administrador</option>
-              <option value={ROLES.SUPERVISOR}>Supervisor</option>
-            </select>
-          </label>
-          <label>
-            Estado
-            <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
-              <option value="active">Activo</option>
-              <option value="inactive">Inactivo</option>
-            </select>
-          </label>
-          <label className="full-field">
-            {editing ? 'Nueva contraseña opcional' : 'Contraseña temporal'}
-            <input type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={editing ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'} />
-          </label>
-        </div>
-
-        <div className="form-actions">
-          {editing ? <button className="secondary-button" type="button" onClick={resetForm}>Cancelar edición</button> : null}
-          <button className="primary-button compact" type="submit" disabled={saving}>{saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear usuario'}</button>
-        </div>
-      </form>
+      {state.error ? <p className="alert error">{state.error}</p> : null}
+      {state.success ? <p className="alert success">{state.success}</p> : null}
 
       <DataTable columns={columns} rows={state.rows} loading={state.loading} emptyMessage="Aún no hay usuarios registrados." />
+
+      {showForm ? (
+        <div className="modal-backdrop">
+          <form className="modal-card modal-card--wide" onSubmit={handleSubmit}>
+            <div className="modal-header">
+              <div>
+                <h2>{editing ? 'Editar usuario' : 'Crear usuario'}</h2>
+                <p>{editing ? 'Actualiza datos, rol, estado o define una nueva contraseña.' : 'El usuario podrá iniciar sesión con el correo y contraseña asignados.'}</p>
+              </div>
+              <button className="modal-close" type="button" onClick={resetForm}>×</button>
+            </div>
+
+            <div className="form-grid">
+              <label>Nombre completo<input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} placeholder="Nombre del usuario" /></label>
+              <label>Correo<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="usuario@empresa.com" /></label>
+              <label>Rol<select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}><option value={ROLES.ADMIN}>Administrador</option><option value={ROLES.SUPERVISOR}>Supervisor</option></select></label>
+              <label>Estado<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}><option value="active">Activo</option><option value="inactive">Inactivo</option></select></label>
+              <label className="full-field">{editing ? 'Nueva contraseña opcional' : 'Contraseña temporal'}<input type="password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={editing ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'} /></label>
+            </div>
+
+            <div className="form-actions">
+              <button className="secondary-button" type="button" onClick={resetForm}>Cancelar</button>
+              <button className="primary-button compact" type="submit" disabled={saving}>{saving ? 'Guardando...' : editing ? 'Guardar cambios' : 'Crear usuario'}</button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </section>
   );
 }
