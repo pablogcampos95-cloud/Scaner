@@ -34,6 +34,17 @@
   margin-bottom: 10px;
 }
 
+.hero-kicker {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.hero-kicker .eyebrow {
+  margin-bottom: 0;
+}
+
 .dashboard-hero p,
 .result-hero p {
   color: var(--text-muted);

@@ -74,8 +74,10 @@ export default function DashboardAdmin() {
     <section className="page-stack">
       <div className="dashboard-hero">
         <div>
-          <Logo size="sm" showText={false} />
-          <span className="eyebrow">Administrador</span>
+          <div className="hero-kicker">
+            <Logo size="sm" showText={false} />
+            <span className="eyebrow">Administrador</span>
+          </div>
           <h1>Control de evaluaciones</h1>
           <p>Monitorea resultados, brechas y avance por perfil.</p>
         </div>

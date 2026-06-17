@@ -29,10 +29,17 @@
 
 .login-copy {
   color: var(--text-main);
+  display: grid;
+  justify-items: start;
 }
 
 .login-hero-logo {
+  display: flex;
   margin-bottom: 14px;
+}
+
+.login-copy .eyebrow {
+  display: block;
 }
 
 .login-copy h1 {
@@ -183,7 +190,7 @@ textarea::placeholder {
 .login-note {
   font-size: 14px;
   line-height: 1.5;
-  text-align: left;
+  text-align: center;
 }
 
 .check-row {

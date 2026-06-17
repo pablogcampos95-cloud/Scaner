@@ -84,8 +84,10 @@ export default function DashboardSupervisor() {
     <section className="page-stack">
       <div className="dashboard-hero">
         <div>
-          <Logo size="sm" showText={false} />
-          <span className="eyebrow">Supervisor</span>
+          <div className="hero-kicker">
+            <Logo size="sm" showText={false} />
+            <span className="eyebrow">Supervisor</span>
+          </div>
           <h1>Seguimiento de evaluados</h1>
           <p>Registra postulantes, asigna pruebas y monitorea resultados.</p>
         </div>

@@ -83,8 +83,8 @@ export default function Login() {
           </button>
           <p className="demo-note login-note">
             {isSupabaseConfigured
-              ? 'Accede con tus credenciales corporativas.'
-              : 'Modo local: admin@demo.com o supervisor@demo.com con cualquier contraseña.'}
+              ? 'Tus datos están protegidos y se usan solo para fines de evaluación.'
+              : 'Tus datos están protegidos. Modo local: admin@demo.com o supervisor@demo.com.'}
           </p>
         </form>
       </section>
