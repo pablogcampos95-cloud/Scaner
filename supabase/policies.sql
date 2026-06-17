@@ -184,6 +184,12 @@ on public.asignaciones for select
 to authenticated
 using (supervisor_id = auth.uid());
 
+drop policy if exists "admin_delete_asignaciones" on public.asignaciones;
+create policy "admin_delete_asignaciones"
+on public.asignaciones for delete
+to authenticated
+using (public.current_profile_role() = 'admin');
+
 create policy "supervisor_insert_own_asignaciones"
 on public.asignaciones for insert
 to authenticated
@@ -225,6 +231,12 @@ with check (estado in ('en_proceso', 'completada'));
 
 create policy "admin_select_all_resultados"
 on public.resultados for select
+to authenticated
+using (public.current_profile_role() = 'admin');
+
+drop policy if exists "admin_delete_resultados" on public.resultados;
+create policy "admin_delete_resultados"
+on public.resultados for delete
 to authenticated
 using (public.current_profile_role() = 'admin');
 
@@ -287,6 +299,12 @@ on public.evaluation_responses for select
 to authenticated
 using (public.current_profile_role() = 'admin');
 
+drop policy if exists "admin_delete_responses" on public.evaluation_responses;
+create policy "admin_delete_responses"
+on public.evaluation_responses for delete
+to authenticated
+using (public.current_profile_role() = 'admin');
+
 create policy "supervisor_select_own_responses"
 on public.evaluation_responses for select
 to authenticated
@@ -330,6 +348,12 @@ on public.manual_reviews for select
 to authenticated
 using (public.current_profile_role() = 'admin' or reviewer_id = auth.uid());
 
+drop policy if exists "admin_delete_manual_reviews" on public.manual_reviews;
+create policy "admin_delete_manual_reviews"
+on public.manual_reviews for delete
+to authenticated
+using (public.current_profile_role() = 'admin');
+
 create policy "public_upload_audio_responses"
 on storage.objects for insert
 to anon
@@ -353,6 +377,12 @@ with check (false);
 
 create policy "admin_select_correos"
 on public.correos_enviados for select
+to authenticated
+using (public.current_profile_role() = 'admin');
+
+drop policy if exists "admin_delete_correos" on public.correos_enviados;
+create policy "admin_delete_correos"
+on public.correos_enviados for delete
 to authenticated
 using (public.current_profile_role() = 'admin');
 

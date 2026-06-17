@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabaseClient.js';
-import { deleteLocal, insertLocal, listLocal, updateLocal } from './localStore.js';
+import { deleteLocal, deleteLocalWhere, insertLocal, listLocal, updateLocal } from './localStore.js';
 
 export async function listEvaluados(profile) {
   if (isSupabaseConfigured) {
@@ -72,16 +72,51 @@ export async function updateEvaluado(id, values) {
 
 export async function deleteEvaluado(id) {
   if (isSupabaseConfigured) {
-    const { error } = await supabase.from('evaluados').delete().eq('id', id);
-    if (error) {
-      if (error.message?.toLowerCase().includes('foreign key')) {
-        throw new Error('No se puede eliminar este evaluado porque ya tiene asignaciones o resultados asociados.');
-      }
-      throw new Error(error.message);
-    }
+    await deleteSupabaseEvaluadoCascade(id);
     return true;
   }
 
+  const assignmentIds = listLocal('asignaciones').filter((row) => row.evaluado_id === id).map((row) => row.id);
+  const responseIds = listLocal('evaluation_responses').filter((row) => assignmentIds.includes(row.asignacion_id) || row.evaluado_id === id).map((row) => row.id);
+  deleteLocalWhere('manual_reviews', (row) => responseIds.includes(row.response_id));
+  deleteLocalWhere('evaluation_responses', (row) => assignmentIds.includes(row.asignacion_id) || row.evaluado_id === id);
+  deleteLocalWhere('resultados', (row) => row.evaluado_id === id || assignmentIds.includes(row.asignacion_id));
+  deleteLocalWhere('correos_enviados', (row) => assignmentIds.includes(row.asignacion_id));
+  deleteLocalWhere('asignaciones', (row) => row.evaluado_id === id);
   deleteLocal('evaluados', id);
   return true;
+}
+
+async function deleteSupabaseEvaluadoCascade(id) {
+  const { data: assignments, error: assignmentError } = await supabase
+    .from('asignaciones')
+    .select('id')
+    .eq('evaluado_id', id);
+  if (assignmentError) throw new Error(assignmentError.message);
+
+  const assignmentIds = (assignments || []).map((row) => row.id);
+
+  if (assignmentIds.length) {
+    const { data: responses, error: responsesError } = await supabase
+      .from('evaluation_responses')
+      .select('id')
+      .in('asignacion_id', assignmentIds);
+    if (responsesError) throw new Error(responsesError.message);
+
+    const responseIds = (responses || []).map((row) => row.id);
+    if (responseIds.length) await deleteFrom('manual_reviews', 'response_id', responseIds);
+    await deleteFrom('evaluation_responses', 'asignacion_id', assignmentIds);
+    await deleteFrom('resultados', 'asignacion_id', assignmentIds);
+    await deleteFrom('correos_enviados', 'asignacion_id', assignmentIds);
+    await deleteFrom('asignaciones', 'id', assignmentIds);
+  }
+
+  const { error } = await supabase.from('evaluados').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+async function deleteFrom(table, column, values) {
+  if (!values.length) return;
+  const { error } = await supabase.from(table).delete().in(column, values);
+  if (error) throw new Error(error.message);
 }
