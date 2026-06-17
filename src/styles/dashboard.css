@@ -465,6 +465,7 @@
 .ai-suggestion-box p {
   color: var(--text-main);
   margin: 0;
+  white-space: pre-line;
 }
 
 .matrix-shell {

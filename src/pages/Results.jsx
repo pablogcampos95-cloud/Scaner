@@ -14,7 +14,7 @@ import { getLevelByScore } from '../utils/scoreCalculator.js';
 export default function Results() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiError: '' });
+  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiError: '', aiProvider: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ fecha: '', area: '', perfil: '', estado: '', resultado: '' });
 
@@ -31,8 +31,8 @@ export default function Results() {
       : listResultados(profile).then((rows) => ({ rows, selected: null, responses: [] }));
 
     loader
-      .then((payload) => setState({ ...payload, loading: false, error: '', aiLoading: false, aiError: '' }))
-      .catch((error) => setState({ rows: [], selected: null, responses: [], loading: false, error: error.message, aiLoading: false, aiError: '' }));
+      .then((payload) => setState({ ...payload, loading: false, error: '', aiLoading: false, aiError: '', aiProvider: '' }))
+      .catch((error) => setState({ rows: [], selected: null, responses: [], loading: false, error: error.message, aiLoading: false, aiError: '', aiProvider: '' }));
   }, [id, profile]);
 
   const handleGenerateSuggestion = async (force = false) => {
@@ -42,10 +42,11 @@ export default function Results() {
       const response = await generateResultSuggestion(state.selected.id, force);
       setState((prev) => ({
         ...prev,
-        aiLoading: false,
-        selected: {
-          ...prev.selected,
-          ai_suggestion: response.suggestion,
+          aiLoading: false,
+          aiProvider: response.provider || '',
+          selected: {
+            ...prev.selected,
+            ai_suggestion: response.suggestion,
           ai_suggestion_generated_at: new Date().toISOString(),
         },
       }));
@@ -122,6 +123,7 @@ export default function Results() {
           <div className="ai-suggestion-box">
             <span className="eyebrow">Sugerencia IA</span>
             {result.ai_suggestion ? <p>{result.ai_suggestion}</p> : <p className="demo-note">Genera una sugerencia breve con IA para complementar el resultado.</p>}
+            {state.aiProvider === 'fallback' ? <small className="demo-note">Respuesta generada por regla local. Revisa OPENAI_API_KEY si esperabas OpenAI.</small> : null}
             {state.aiError ? <p className="alert error">{state.aiError}</p> : null}
             <button className="secondary-button compact" type="button" onClick={() => handleGenerateSuggestion(Boolean(result.ai_suggestion))} disabled={state.aiLoading}>
               {state.aiLoading ? 'Generando...' : result.ai_suggestion ? 'Regenerar sugerencia IA' : 'Generar sugerencia IA'}

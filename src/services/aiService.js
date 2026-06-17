@@ -3,7 +3,7 @@ import { isSupabaseConfigured, supabase } from './supabaseClient.js';
 export async function generateResultSuggestion(resultadoId, force = false) {
   if (!isSupabaseConfigured) {
     return {
-      suggestion: '- Fortaleza: base evaluable.\n- Debilidad: brechas por validar.\n- Consejo: revisar puntajes críticos.',
+      suggestion: '- Fortaleza: KPIs supera el umbral.\n- Debilidad: Excel queda bajo el estándar.\n- Consejo: avanzar solo con refuerzo focalizado.',
       provider: 'demo',
     };
   }

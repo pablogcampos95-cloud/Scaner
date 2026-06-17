@@ -9,6 +9,12 @@ type Payload = {
   force?: boolean;
 };
 
+type ScoreItem = {
+  key: string;
+  label: string;
+  value: number;
+};
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -57,35 +63,59 @@ function getOutputText(response: any) {
   return content.map((item: any) => item.text || '').join(' ').trim();
 }
 
-function fallbackSuggestion(result: any) {
-  const average = Number(result.promedio_general || 0);
-  if (result.estado_resultado === 'pendiente_revision') {
-    return '- Fortaleza: evidencia disponible.\n- Debilidad: revisión pendiente.\n- Consejo: calificar manuales antes de decidir.';
-  }
-  if (average >= 80) {
-    return '- Fortaleza: dominio sólido.\n- Debilidad: validar adaptación.\n- Consejo: avanzar con seguimiento.';
-  }
-  if (average >= 60) {
-    return '- Fortaleza: base suficiente.\n- Debilidad: brechas puntuales.\n- Consejo: avanzar con refuerzo.';
-  }
-  return '- Fortaleza: intento completo.\n- Debilidad: bajo desempeño.\n- Consejo: no avanzar aún.';
-}
-
-function compactKeywords(result: any) {
-  const role = [
+function getRoleLabel(result: any) {
+  return [
     result.evaluados?.perfiles_operativos?.nombre,
     result.evaluados?.areas?.nombre,
     result.evaluados?.cargo_especifico || result.evaluados?.cargo,
-  ].filter(Boolean).join(' / ') || 'No definido';
+  ].filter(Boolean).join(' / ') || 'rol no definido';
+}
+
+function getScoreSummary(result: any) {
+  const scores: ScoreItem[] = [
+    { key: 'pc', label: 'PC', value: Number(result.puntaje_pc || 0) },
+    { key: 'excel', label: 'Excel', value: Number(result.puntaje_excel || 0) },
+    { key: 'etica', label: 'Etica', value: Number(result.puntaje_etica || 0) },
+    { key: 'kpis', label: 'KPIs', value: Number(result.puntaje_kpis || 0) },
+  ];
+  const strongest = [...scores].sort((a, b) => b.value - a.value)[0];
+  const weakest = [...scores].sort((a, b) => a.value - b.value)[0];
+  const average = Number(result.promedio_general || 0);
+  const decision = result.estado_resultado === 'pendiente_revision'
+    ? 'revisar manuales antes de decidir'
+    : average >= 80
+      ? 'avanzar'
+      : average >= 60
+        ? 'avanzar con refuerzo'
+        : 'no avanzar aun';
+
+  return { average, strongest, weakest, decision };
+}
+
+function fallbackSuggestion(result: any) {
+  const role = getRoleLabel(result);
+  const { average, strongest, weakest, decision } = getScoreSummary(result);
+  if (result.estado_resultado === 'pendiente_revision') {
+    return `- Fortaleza: ${strongest.label} destaca con ${strongest.value}%.\n- Debilidad: hay revision manual pendiente.\n- Consejo: cerrar revision antes de decidir para ${role}.`;
+  }
+  return `- Fortaleza: ${strongest.label} alcanza ${strongest.value}%.\n- Debilidad: ${weakest.label} queda en ${weakest.value}%, promedio ${average}%.\n- Consejo: ${decision} para ${role}.`;
+}
+
+function compactKeywords(result: any) {
+  const role = getRoleLabel(result);
+  const { average, strongest, weakest, decision } = getScoreSummary(result);
 
   return {
     rol_postulado: role,
     resultado: result.resultado_final,
-    promedio: result.promedio_general,
-    pc: result.puntaje_pc,
-    excel: result.puntaje_excel,
-    etica: result.puntaje_etica,
-    kpis: result.puntaje_kpis,
+    promedio: average,
+    puntaje_mas_alto: `${strongest.label} ${strongest.value}%`,
+    puntaje_mas_bajo: `${weakest.label} ${weakest.value}%`,
+    pc: Number(result.puntaje_pc || 0),
+    excel: Number(result.puntaje_excel || 0),
+    etica: Number(result.puntaje_etica || 0),
+    kpis: Number(result.puntaje_kpis || 0),
+    decision_sugerida: decision,
     estado: result.estado_resultado || 'finalizado',
   };
 }
@@ -134,14 +164,14 @@ Deno.serve(async (request) => {
           input: [
             {
               role: 'system',
-              content: 'Actúa como evaluador. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Máximo 30 palabras en total. Sin saludos ni texto adicional.',
+              content: 'Actua como evaluador BPO. Personaliza con los porcentajes entregados y el rol postulado. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 45 palabras en total. Sin saludos ni texto adicional.',
             },
             {
               role: 'user',
-              content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes o palabras clave, no texto largo.`,
+              content: `Resultados: ${JSON.stringify(prompt)}. Menciona al menos un puntaje especifico y contextualiza la recomendacion con el rol postulado.`,
             },
           ],
-          max_output_tokens: 80,
+          max_output_tokens: 110,
         }),
       });
 
