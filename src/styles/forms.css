@@ -339,3 +339,74 @@ textarea::placeholder {
     flex-direction: column-reverse;
   }
 }
+
+/* Internal form surface */
+.page-container label {
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.page-container input,
+.page-container select,
+.page-container textarea {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  color: var(--text-main);
+  font-weight: 500;
+  min-height: 44px;
+}
+
+.page-container input:focus,
+.page-container select:focus,
+.page-container textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(24, 119, 255, 0.10);
+}
+
+.page-container input::placeholder,
+.page-container textarea::placeholder {
+  color: var(--text-soft);
+}
+
+.form-card,
+.guided-step,
+.builder-card,
+.builder-preview,
+.check-row {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+}
+
+.builder-card,
+.builder-preview {
+  background: var(--surface-soft);
+}
+
+.form-title h2,
+.builder-panel h2,
+.builder-card h3 {
+  color: var(--text-main);
+}
+
+.form-title p,
+.target-selector p,
+.demo-note {
+  color: var(--text-muted);
+}
+
+.guided-step > span {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.target-row {
+  background: var(--primary-soft);
+  border-color: #bfdbfe;
+  color: var(--text-main);
+}
+
+.target-row button {
+  color: var(--primary);
+}

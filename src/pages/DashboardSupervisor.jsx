@@ -5,6 +5,7 @@ import ProfileScoreChart from '../components/charts/ProfileScoreChart.jsx';
 import ResultsDistributionChart from '../components/charts/ResultsDistributionChart.jsx';
 import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
+import MetricCard from '../components/MetricCard.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import { listAsignaciones } from '../services/asignacionesService.js';
@@ -101,6 +102,15 @@ export default function DashboardSupervisor() {
 
       {state.error ? <p className="alert error">{state.error}</p> : null}
       {state.notice ? <p className="alert success">{state.notice}</p> : null}
+
+      <div className="metrics-grid metrics-grid--primary">
+        <MetricCard title="Mis evaluados" value={indicators.uniqueEvaluados} helper="Perfiles registrados" />
+        <MetricCard title="Evaluaciones asignadas" value={indicators.assigned} helper="Pruebas emitidas" tone="info" />
+        <MetricCard title="Completadas" value={indicators.completed} helper="Finalizadas" tone="success" />
+        <MetricCard title="Pendientes" value={indicators.pending} helper="Por iniciar" tone="warning" />
+        <MetricCard title="Vencidas" value={indicators.expired} helper="Fuera de plazo" tone="danger" />
+        <MetricCard title="Puntaje promedio" value={formatPercent(indicators.average)} helper="Resultado general" tone="info" />
+      </div>
 
       <div className="section-heading">
         <div>

@@ -548,9 +548,9 @@
 
 .result--pendiente_de_revisiÃ³n,
 .result--pendiente_de_revision {
-  background: rgba(139, 92, 246, 0.14);
-  border: 1px solid rgba(139, 92, 246, 0.24);
-  color: #c4b5fd;
+  background: rgba(37, 99, 235, 0.14);
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  color: #1d4ed8;
 }
 
 .table-shell {
@@ -741,5 +741,328 @@
   .result-hero-logo img {
     height: 96px;
     width: 96px;
+  }
+}
+
+/* Light corporate assessment overrides */
+.dashboard-hero {
+  background:
+    radial-gradient(circle at 92% 18%, rgba(255, 255, 255, 0.20), transparent 22%),
+    linear-gradient(135deg, #16bfe8 0%, #1877ff 58%, #0f5ed7 100%);
+  border: 0;
+  box-shadow: 0 18px 38px rgba(24, 119, 255, 0.22);
+  min-height: 166px;
+  padding: 26px 28px;
+}
+
+.dashboard-hero::before {
+  display: none;
+}
+
+.dashboard-hero h1,
+.dashboard-hero p,
+.dashboard-hero .eyebrow {
+  color: #ffffff;
+}
+
+.dashboard-hero .eyebrow {
+  opacity: 0.86;
+}
+
+.dashboard-hero .logo {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.dashboard-hero .primary-button {
+  background: #ffffff;
+  color: var(--primary);
+}
+
+.dashboard-hero .secondary-button {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #ffffff;
+}
+
+.result-hero {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.result-hero::before {
+  background: var(--blue-gradient);
+}
+
+.result-hero h1 {
+  color: var(--text-main);
+}
+
+.result-hero p {
+  color: var(--text-muted);
+}
+
+.metrics-grid--primary {
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+}
+
+.metric-card,
+.secondary-indicators > div,
+.chart-card,
+.result-summary > div,
+.module-score,
+.plain-section {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+}
+
+.metric-card {
+  min-height: 124px;
+  position: relative;
+}
+
+.metric-card::before {
+  background: var(--primary-soft);
+  border-radius: 12px;
+  content: "";
+  height: 34px;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 34px;
+}
+
+.metric-card::after {
+  background: var(--primary);
+  border-radius: 999px;
+  content: "";
+  height: 10px;
+  position: absolute;
+  right: 30px;
+  top: 30px;
+  width: 10px;
+}
+
+.metric-card--success::before { background: var(--success-soft); }
+.metric-card--success::after { background: var(--success); }
+.metric-card--warning::before { background: var(--warning-soft); }
+.metric-card--warning::after { background: var(--warning); }
+.metric-card--danger::before { background: var(--danger-soft); }
+.metric-card--danger::after { background: var(--danger); }
+.metric-card--info::before { background: var(--info-soft); }
+.metric-card--info::after { background: var(--info); }
+
+.metric-card span,
+.metric-card small,
+.secondary-indicators span,
+.chart-card__header p,
+.result-summary span,
+.result-summary small,
+.module-score span,
+.module-score small,
+.plain-section p,
+.matrix-list span,
+.matrix-list small {
+  color: var(--text-muted);
+}
+
+.metric-card strong,
+.secondary-indicators strong,
+.chart-card__header h2,
+.plain-section h2,
+.result-summary strong,
+.module-score strong {
+  color: var(--text-main);
+}
+
+.chart-card {
+  min-height: 340px;
+}
+
+.chart-card__header h2 {
+  font-size: 17px;
+}
+
+.chart-empty {
+  background: var(--surface-soft);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-muted);
+}
+
+.secondary-indicators > div {
+  min-height: 76px;
+}
+
+.filters-bar {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.table-shell,
+.matrix-shell {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.data-table {
+  background: #ffffff;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.data-table th,
+.matrix-table th {
+  background: var(--surface-soft);
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.data-table td,
+.matrix-table td {
+  border-bottom: 1px solid #eaecf0;
+  color: #344054;
+  font-weight: 500;
+}
+
+.data-table td:first-child {
+  color: var(--text-main);
+  font-weight: 650;
+}
+
+.data-table tbody tr:nth-child(even) td {
+  background: #ffffff;
+}
+
+.data-table tr:hover td {
+  background: var(--surface-soft);
+}
+
+.table-actions a,
+.table-actions button {
+  background: var(--primary-soft);
+  border: 1px solid #bfdbfe;
+  color: var(--primary);
+}
+
+.table-actions a:hover,
+.table-actions button:hover {
+  background: #dbeafe;
+}
+
+.table-actions .danger-action {
+  background: var(--danger-soft);
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.table-actions .danger-action:hover {
+  background: #fecaca;
+}
+
+.badge {
+  border: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 24px;
+  padding: 5px 10px;
+}
+
+.status--completada,
+.result--apto {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status--asignada,
+.status--enviada,
+.status--pendiente,
+.result--sin_resultado {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status--en_proceso,
+.result--pendiente_de_revision,
+.result--pendiente_de_revisiÃ³n,
+.result--pendiente_de_revisiÃƒÂ³n {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.result--apto_con_refuerzo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status--vencida,
+.result--no_apto_temporal {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.score-value--danger {
+  color: var(--danger) !important;
+}
+
+.score-pill-text.score-value--success {
+  background: var(--success-soft);
+}
+
+.score-pill-text.score-value--warning {
+  background: var(--warning-soft);
+}
+
+.score-pill-text.score-value--danger {
+  background: var(--danger-soft);
+}
+
+.matrix-table th,
+.matrix-table td {
+  border-color: #eaecf0;
+}
+
+.matrix-table td strong {
+  color: var(--primary);
+}
+
+.modal-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+
+.modal-header h2 {
+  color: var(--text-main);
+}
+
+.modal-header p {
+  color: var(--text-muted);
+}
+
+.modal-close {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+}
+
+@media (max-width: 1280px) {
+  .metrics-grid--primary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .metrics-grid--primary,
+  .charts-grid {
+    grid-template-columns: 1fr;
   }
 }

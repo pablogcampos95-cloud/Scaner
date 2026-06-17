@@ -1,5 +1,19 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, Bell, FileBarChart, LayoutDashboard, Library, ListChecks, LogOut, Search, Settings, Table2, UserCog, UserPlus, Users } from 'lucide-react';
+import {
+  BarChart3,
+  Bell,
+  FileBarChart,
+  LayoutDashboard,
+  Library,
+  ListChecks,
+  LogOut,
+  Search,
+  Settings,
+  Table2,
+  UserCog,
+  UserPlus,
+  Users,
+} from 'lucide-react';
 import { signOut } from '../services/authService.js';
 import { ROLE_LABELS } from '../utils/roles.js';
 import Logo from './Logo.jsx';
@@ -14,17 +28,30 @@ export default function Navbar({ profile }) {
     navigate('/login', { replace: true });
   };
 
-  const navItems = [
-    { to: homePath, label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/evaluados', label: 'Evaluados', icon: Users },
-    ...(isAdmin ? [{ to: '/admin/evaluaciones', label: 'Evaluaciones', icon: ListChecks }] : []),
-    ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Áreas y perfiles', icon: Library }] : []),
-    ...(isAdmin ? [{ to: '/admin/matriz-evaluaciones', label: 'Matriz de perfiles', icon: Table2 }] : []),
-    ...(isAdmin ? [{ to: '/admin/usuarios', label: 'Usuarios', icon: UserCog }] : []),
-    ...(!isAdmin ? [{ to: '/asignar-evaluacion', label: 'Asignar evaluación', icon: UserPlus }] : []),
-    { to: '/resultados', label: 'Resultados', icon: BarChart3 },
-    { to: '#reportes', label: 'Reportes', icon: FileBarChart, disabled: true },
-    { to: '#configuracion', label: 'Configuración', icon: Settings, disabled: true },
+  const navGroups = [
+    {
+      label: 'Principal',
+      items: [{ to: homePath, label: 'Dashboard', icon: LayoutDashboard }],
+    },
+    {
+      label: 'Gestión',
+      items: [
+        { to: '/evaluados', label: 'Evaluados', icon: Users },
+        ...(isAdmin ? [{ to: '/admin/evaluaciones', label: 'Evaluaciones', icon: ListChecks }] : []),
+        ...(!isAdmin ? [{ to: '/asignar-evaluacion', label: 'Asignar evaluación', icon: UserPlus }] : []),
+        { to: '/resultados', label: 'Resultados', icon: BarChart3 },
+      ],
+    },
+    {
+      label: 'Administración',
+      items: [
+        ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Áreas y perfiles', icon: Library }] : []),
+        ...(isAdmin ? [{ to: '/admin/matriz-evaluaciones', label: 'Matriz de perfiles', icon: Table2 }] : []),
+        ...(isAdmin ? [{ to: '/admin/usuarios', label: 'Usuarios', icon: UserCog }] : []),
+        { to: '#reportes', label: 'Reportes', icon: FileBarChart, disabled: true },
+        { to: '#configuracion', label: 'Configuración', icon: Settings, disabled: true },
+      ],
+    },
   ];
 
   return (
@@ -35,20 +62,25 @@ export default function Navbar({ profile }) {
         </Link>
 
         <nav className="sidebar-nav" aria-label="Navegación principal">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return item.disabled ? (
-              <span className="sidebar-link sidebar-link--disabled" key={item.label}>
-                <Icon size={18} />
-                {item.label}
-              </span>
-            ) : (
-              <NavLink className="sidebar-link" to={item.to} key={item.label}>
-                <Icon size={18} />
-                {item.label}
-              </NavLink>
-            );
-          })}
+          {navGroups.map((group) => (
+            <div className="sidebar-group" key={group.label}>
+              <span className="sidebar-group-title">{group.label}</span>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                return item.disabled ? (
+                  <span className="sidebar-link sidebar-link--disabled" key={item.label}>
+                    <Icon size={18} />
+                    {item.label}
+                  </span>
+                ) : (
+                  <NavLink className="sidebar-link" to={item.to} key={item.label}>
+                    <Icon size={18} />
+                    {item.label}
+                  </NavLink>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-footer">

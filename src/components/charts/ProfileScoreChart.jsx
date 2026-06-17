@@ -9,22 +9,22 @@ export default function ProfileScoreChart({ title = 'Puntaje promedio por perfil
       {hasData ? (
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={data} margin={{ top: 16, right: 10, left: -18, bottom: 4 }}>
-            <CartesianGrid stroke="rgba(148, 163, 184, 0.10)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fill: '#A8B3C7', fontSize: 12 }} axisLine={{ stroke: 'rgba(148, 163, 184, 0.16)' }} tickLine={false} />
-            <YAxis domain={[0, 100]} tick={{ fill: '#A8B3C7', fontSize: 12 }} axisLine={false} tickLine={false} />
+            <CartesianGrid stroke="#EEF2F6" vertical={false} />
+            <XAxis dataKey="name" tick={{ fill: '#667085', fontSize: 12 }} axisLine={{ stroke: '#E5E7EB' }} tickLine={false} />
+            <YAxis domain={[0, 100]} tick={{ fill: '#667085', fontSize: 12 }} axisLine={false} tickLine={false} />
             <Tooltip
               formatter={(value) => [`${value}%`, 'Puntaje promedio']}
-              cursor={{ fill: 'rgba(22, 191, 232, 0.06)' }}
-              contentStyle={{ background: '#0B1728', border: '1px solid rgba(148, 163, 184, 0.18)', borderRadius: 12, color: '#F8FAFC' }}
-              labelStyle={{ color: '#A8B3C7' }}
+              cursor={{ fill: '#F9FAFB' }}
+              contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 12, color: '#101828', boxShadow: '0 12px 30px rgba(15, 23, 42, 0.12)' }}
+              labelStyle={{ color: '#667085' }}
             />
             <Bar dataKey="value" fill="#16BFE8" radius={[8, 8, 0, 0]} barSize={32}>
-              <LabelList dataKey="value" position="top" formatter={(value) => `${value}%`} fill="#DDE7F5" fontSize={12} />
+              <LabelList dataKey="value" position="top" formatter={(value) => `${value}%`} fill="#101828" fontSize={12} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       ) : (
-        <p className="chart-empty">Datos en construcción.</p>
+        <p className="chart-empty">Datos en construccion.</p>
       )}
     </ChartCard>
   );
