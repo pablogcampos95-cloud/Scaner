@@ -109,6 +109,12 @@ to authenticated
 using (public.current_profile_role() = 'admin')
 with check (public.current_profile_role() = 'admin');
 
+drop policy if exists "admin_delete_evaluaciones" on public.evaluaciones;
+create policy "admin_delete_evaluaciones"
+on public.evaluaciones for delete
+to authenticated
+using (public.current_profile_role() = 'admin');
+
 create policy "public_select_active_evaluaciones"
 on public.evaluaciones for select
 to anon

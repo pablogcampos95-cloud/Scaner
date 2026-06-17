@@ -4,7 +4,7 @@ import DataTable from '../components/DataTable.jsx';
 import EvaluationBuilder from '../components/evaluation-builder/EvaluationBuilder.jsx';
 import QuestionBuilder from '../components/evaluation-builder/QuestionBuilder.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
-import { createSection, deactivateEvaluacion, getEvaluaciones, getEvaluationWithQuestions } from '../services/evaluacionesService.js';
+import { createSection, deactivateEvaluacion, deleteEvaluacion, getEvaluaciones, getEvaluationWithQuestions } from '../services/evaluacionesService.js';
 import { formatDate } from '../utils/formatters.js';
 
 export default function AdminEvaluations({ mode = 'list' }) {
@@ -25,6 +25,17 @@ export default function AdminEvaluations({ mode = 'list' }) {
   const handleToggle = async (evaluationId) => {
     await deactivateEvaluacion(evaluationId);
     load();
+  };
+
+  const handleDelete = async (evaluation) => {
+    const confirmed = window.confirm(`¿Eliminar la evaluación "${evaluation.nombre}"? Esta acción no se puede deshacer si la evaluación no tiene registros asociados.`);
+    if (!confirmed) return;
+    try {
+      await deleteEvaluacion(evaluation.id);
+      load();
+    } catch (error) {
+      setState((prev) => ({ ...prev, error: error.message }));
+    }
   };
 
   const handleCreateSection = async () => {
@@ -130,6 +141,7 @@ export default function AdminEvaluations({ mode = 'list' }) {
           <Link to={`/admin/evaluaciones/${row.id}/editar`}>Editar</Link>
           <Link to={`/admin/evaluaciones/${row.id}/preguntas`}>Preguntas</Link>
           <button type="button" onClick={() => handleToggle(row.id)}>{row.estado === 'activa' ? 'Desactivar' : 'Activar'}</button>
+          <button className="danger-action" type="button" onClick={() => handleDelete(row)}>Eliminar</button>
         </div>
       ),
     },

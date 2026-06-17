@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabaseClient.js';
-import { insertLocal, listLocal, updateLocal } from './localStore.js';
+import { deleteLocal, deleteLocalWhere, insertLocal, listLocal, updateLocal } from './localStore.js';
 
 export async function listEvaluaciones() {
   return getEvaluacionesActivas();
@@ -76,6 +76,25 @@ export async function updateEvaluacion(id, data) {
 export async function deactivateEvaluacion(id) {
   const evaluacion = await getEvaluacionById(id);
   return updateEvaluacion(id, { estado: evaluacion?.estado === 'activa' ? 'inactiva' : 'activa' });
+}
+
+export async function deleteEvaluacion(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('evaluaciones').delete().eq('id', id);
+    if (error) {
+      if (error.message?.toLowerCase().includes('foreign key')) {
+        throw new Error('No se puede eliminar esta evaluación porque ya tiene asignaciones o resultados asociados. Desactívala para que no pueda volver a asignarse.');
+      }
+      throw new Error(error.message);
+    }
+    return true;
+  }
+
+  deleteLocalWhere('evaluation_targets', (row) => row.evaluacion_id === id);
+  deleteLocalWhere('evaluation_sections', (row) => row.evaluacion_id === id);
+  deleteLocalWhere('questions', (row) => row.evaluacion_id === id);
+  deleteLocal('evaluaciones', id);
+  return true;
 }
 
 export async function getEvaluationTargets(evaluacionId) {

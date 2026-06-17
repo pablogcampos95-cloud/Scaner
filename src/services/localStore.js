@@ -182,6 +182,20 @@ export function updateLocal(table, id, values) {
   return db[table].find((row) => row.id === id);
 }
 
+export function deleteLocal(table, id) {
+  const db = readDb();
+  db[table] = (db[table] || []).filter((row) => row.id !== id);
+  writeDb(db);
+  return true;
+}
+
+export function deleteLocalWhere(table, predicate) {
+  const db = readDb();
+  db[table] = (db[table] || []).filter((row) => !predicate(row));
+  writeDb(db);
+  return true;
+}
+
 export function setLocalSession(profile) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
 }

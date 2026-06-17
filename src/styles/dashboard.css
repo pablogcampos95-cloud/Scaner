@@ -487,15 +487,19 @@
 
 .table-shell {
   background: linear-gradient(180deg, rgba(16, 29, 50, 0.92), rgba(11, 23, 40, 0.92));
+  border-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
 }
 
 .data-table {
   background: transparent;
+  font-size: 14px;
 }
 
 .data-table th,
 .data-table td {
-  padding: 14px 18px;
+  line-height: 1.35;
+  padding: 15px 18px;
 }
 
 .data-table th {
@@ -503,6 +507,27 @@
   color: #9fb0c9;
   font-size: 12px;
   letter-spacing: 0.01em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.data-table td {
+  color: #dce7f7;
+  font-weight: 500;
+}
+
+.data-table td:first-child {
+  color: #f8fafc;
+  font-weight: 650;
+}
+
+.data-table tbody tr {
+  transition: background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.data-table tbody tr:nth-child(even) td {
+  background: rgba(148, 163, 184, 0.025);
 }
 
 .empty-table {
@@ -527,6 +552,16 @@
 .table-actions a:hover,
 .table-actions button:hover {
   background: rgba(22, 191, 232, 0.14);
+}
+
+.table-actions .danger-action {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
+}
+
+.table-actions .danger-action:hover {
+  background: rgba(239, 68, 68, 0.16);
 }
 
 .toolbar-actions {
