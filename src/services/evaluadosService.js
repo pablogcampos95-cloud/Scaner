@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabaseClient.js';
-import { insertLocal, listLocal, updateLocal } from './localStore.js';
+import { deleteLocal, insertLocal, listLocal, updateLocal } from './localStore.js';
 
 export async function listEvaluados(profile) {
   if (isSupabaseConfigured) {
@@ -37,6 +37,23 @@ export async function createEvaluado(values, supervisorId) {
   return insertLocal('evaluados', payload);
 }
 
+export async function createEvaluadosBulk(rows, supervisorId) {
+  const payload = rows.map((values) => ({
+    ...values,
+    campana: values.unidad || values.campana,
+    cargo: values.cargo_especifico || values.cargo,
+    supervisor_id: supervisorId,
+  }));
+
+  if (isSupabaseConfigured) {
+    const { data, error } = await supabase.from('evaluados').insert(payload).select();
+    if (error) throw new Error(error.message);
+    return data || [];
+  }
+
+  return payload.map((row) => insertLocal('evaluados', row));
+}
+
 export async function updateEvaluado(id, values) {
   const payload = {
     ...values,
@@ -51,4 +68,20 @@ export async function updateEvaluado(id, values) {
   }
 
   return updateLocal('evaluados', id, payload);
+}
+
+export async function deleteEvaluado(id) {
+  if (isSupabaseConfigured) {
+    const { error } = await supabase.from('evaluados').delete().eq('id', id);
+    if (error) {
+      if (error.message?.toLowerCase().includes('foreign key')) {
+        throw new Error('No se puede eliminar este evaluado porque ya tiene asignaciones o resultados asociados.');
+      }
+      throw new Error(error.message);
+    }
+    return true;
+  }
+
+  deleteLocal('evaluados', id);
+  return true;
 }

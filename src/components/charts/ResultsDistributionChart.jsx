@@ -35,6 +35,7 @@ export default function ResultsDistributionChart({ title = 'Resultado de evaluad
               labelFormatter={(_, payload) => payload?.[0]?.payload?.name || ''}
               cursor={{ fill: 'rgba(22, 191, 232, 0.06)' }}
               contentStyle={{ background: '#0B1728', border: '1px solid rgba(148, 163, 184, 0.18)', borderRadius: 12, color: '#F8FAFC' }}
+              itemStyle={{ color: '#7DD3FC' }}
               labelStyle={{ color: '#A8B3C7' }}
             />
             <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={18}>

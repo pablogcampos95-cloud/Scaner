@@ -93,6 +93,12 @@ on public.evaluados for insert
 to authenticated
 with check (supervisor_id = auth.uid());
 
+drop policy if exists "admin_delete_evaluados" on public.evaluados;
+create policy "admin_delete_evaluados"
+on public.evaluados for delete
+to authenticated
+using (public.current_profile_role() = 'admin');
+
 create policy "authenticated_select_active_evaluaciones"
 on public.evaluaciones for select
 to authenticated
