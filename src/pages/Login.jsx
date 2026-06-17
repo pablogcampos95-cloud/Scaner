@@ -51,21 +51,20 @@ export default function Login() {
       <section className="login-panel">
         <div className="login-copy">
           <Logo size="lg" showText={false} className="login-hero-logo" />
-          <span className="eyebrow">ASSESSMENT OPERATIVO CON ENFOQUE IA</span>
+          <span className="eyebrow">ASSESSMENT OPERATIVO CON IA</span>
           <h1>ScanerIA</h1>
-          <h2>Evaluación inteligente de competencias</h2>
-          <p>Evalúa perfiles BPO con precisión, trazabilidad y apoyo de IA.</p>
+          <h2>Evaluación inteligente para perfiles BPO.</h2>
+          <p>Precisión, trazabilidad y diagnóstico en un solo entorno.</p>
         </div>
 
         <form className="form-card login-form" onSubmit={handleSubmit}>
-          <Logo size="md" showText={false} className="login-form-logo" />
           <div className="form-title centered">
             <span className="login-title-icon" aria-hidden="true">
               <LockKeyhole size={22} />
             </span>
             <div>
               <h2>Iniciar sesión</h2>
-              <p>Acceso para administradores y supervisores</p>
+              <p>Acceso autorizado.</p>
             </div>
           </div>
           <label>
@@ -84,7 +83,7 @@ export default function Login() {
           </button>
           <p className="demo-note login-note">
             {isSupabaseConfigured
-              ? 'inicia tu experiencia de evaluación con IA'
+              ? 'Accede con tus credenciales corporativas.'
               : 'Modo local: admin@demo.com o supervisor@demo.com con cualquier contraseña.'}
           </p>
         </form>

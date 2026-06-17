@@ -60,7 +60,7 @@ export default function Navbar({ profile }) {
       <header className="topbar">
         <div className="topbar-search">
           <Search size={18} />
-          <span>Buscar evaluados, campañas o resultados</span>
+          <span>Buscar evaluado o campaña</span>
         </div>
 
         <Logo size="sm" showText={false} className="topbar-logo" />

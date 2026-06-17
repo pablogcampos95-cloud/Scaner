@@ -8,7 +8,7 @@
 
 .evaluation-panel {
   background: rgba(16, 33, 63, 0.92);
-  border: 1px solid rgba(0, 200, 255, 0.26);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 20px;
   box-shadow: var(--shadow);
   margin: 0 auto;
@@ -36,7 +36,7 @@
 
 .identity-box {
   background: rgba(6, 20, 38, 0.72);
-  border: 1px solid rgba(30, 78, 120, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   display: grid;
   gap: 7px;
@@ -48,7 +48,7 @@
 }
 
 .start-block {
-  border-top: 1px solid rgba(30, 78, 120, 0.72);
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
   display: grid;
   gap: 18px;
   margin-top: 24px;
@@ -66,13 +66,13 @@
   border: 1px solid rgba(0, 200, 255, 0.28);
   border-radius: 999px;
   color: #7ddcff;
-  font-weight: 800;
+  font-weight: 600;
   padding: 8px 12px;
 }
 
 .confidential-note {
   background: rgba(6, 20, 38, 0.55);
-  border: 1px solid rgba(30, 78, 120, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 14px;
   color: var(--text-muted);
   margin-bottom: 0;
@@ -87,7 +87,7 @@
 
 .progress-card {
   background: rgba(6, 20, 38, 0.64);
-  border: 1px solid rgba(30, 78, 120, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   display: grid;
   gap: 10px;
@@ -129,7 +129,7 @@
 
 .module-heading span {
   color: var(--primary);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .question-module h2 {
@@ -140,7 +140,7 @@
 
 .question-card {
   background: rgba(6, 20, 38, 0.58);
-  border: 1px solid rgba(30, 78, 120, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   display: grid;
   gap: 12px;
@@ -153,7 +153,7 @@
 .question-title {
   color: var(--text-main);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.35;
   margin: 0;
   overflow-wrap: anywhere;
@@ -175,16 +175,16 @@
   background: rgba(0, 200, 255, 0.08);
   border: 1px solid rgba(0, 200, 255, 0.18);
   color: #d7f4ff;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .option-row {
   align-items: center;
   background: rgba(16, 33, 63, 0.82);
-  border: 1px solid rgba(30, 78, 120, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 12px;
   display: flex;
-  font-weight: 700;
+  font-weight: 500;
   gap: 10px;
   padding: 11px 12px;
 }

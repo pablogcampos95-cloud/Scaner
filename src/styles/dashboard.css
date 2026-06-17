@@ -2,22 +2,23 @@
 .result-hero {
   align-items: center;
   background:
-    radial-gradient(circle at top right, rgba(0, 200, 255, 0.16), transparent 38%),
-    linear-gradient(135deg, rgba(16, 33, 63, 0.98), rgba(7, 26, 51, 0.96));
-  border: 1px solid rgba(0, 200, 255, 0.24);
+    radial-gradient(circle at top right, rgba(0, 200, 255, 0.1), transparent 38%),
+    linear-gradient(135deg, rgba(16, 33, 63, 0.9), rgba(7, 26, 51, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 18px;
   box-shadow: var(--shadow);
   display: grid;
   gap: 20px;
   grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
-  padding: 26px;
+  padding: 22px 24px;
   position: relative;
 }
 
 .dashboard-hero h1,
 .result-hero h1 {
-  font-size: 34px;
+  font-size: 30px;
+  font-weight: 700;
   line-height: 1.12;
   margin-bottom: 10px;
 }
@@ -56,41 +57,43 @@
 }
 
 .metric-card {
-  background: linear-gradient(180deg, rgba(16, 33, 63, 0.98), rgba(11, 29, 56, 0.98));
-  border: 1px solid rgba(30, 78, 120, 0.92);
+  background: linear-gradient(180deg, rgba(16, 33, 63, 0.86), rgba(11, 29, 56, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   display: grid;
-  gap: 10px;
-  min-height: 126px;
-  padding: 18px;
+  gap: 12px;
+  min-height: 116px;
+  padding: 20px;
 }
 
 .metric-card span,
 .metric-card small {
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .metric-card strong {
   color: var(--text-main);
-  font-size: 34px;
+  font-size: 30px;
+  font-weight: 700;
   line-height: 1;
 }
 
 .metric-card--success {
-  border-color: rgba(34, 197, 94, 0.58);
+  border-color: rgba(34, 197, 94, 0.22);
 }
 
 .metric-card--warning {
-  border-color: rgba(250, 204, 21, 0.58);
+  border-color: rgba(250, 204, 21, 0.22);
 }
 
 .metric-card--danger {
-  border-color: rgba(239, 68, 68, 0.58);
+  border-color: rgba(239, 68, 68, 0.22);
 }
 
 .filters-bar {
   background: rgba(16, 33, 63, 0.7);
-  border: 1px solid rgba(30, 78, 120, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   display: grid;
   gap: 12px;
@@ -105,7 +108,7 @@
 
 .table-shell {
   background: rgba(16, 33, 63, 0.76);
-  border: 1px solid rgba(30, 78, 120, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   overflow-x: auto;
 }
@@ -118,16 +121,17 @@
 
 .data-table th,
 .data-table td {
-  border-bottom: 1px solid rgba(30, 78, 120, 0.5);
-  padding: 15px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  padding: 16px;
   text-align: left;
   vertical-align: middle;
 }
 
 .data-table th {
-  background: rgba(7, 26, 51, 0.98);
-  color: var(--text-main);
+  background: rgba(7, 26, 51, 0.82);
+  color: var(--text-muted);
   font-size: 13px;
+  font-weight: 600;
 }
 
 .data-table tr:hover td {
@@ -147,7 +151,7 @@
   border-radius: 999px;
   display: inline-flex;
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 600;
   min-height: 26px;
   padding: 5px 10px;
   white-space: nowrap;
@@ -189,7 +193,7 @@
   background: transparent;
   border: 0;
   color: var(--primary);
-  font-weight: 900;
+  font-weight: 600;
   padding: 0;
 }
 
@@ -208,7 +212,7 @@
 .module-score,
 .plain-section {
   background: rgba(16, 33, 63, 0.86);
-  border: 1px solid rgba(30, 78, 120, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   padding: 18px;
 }
@@ -231,7 +235,8 @@
 .module-score strong {
   color: var(--text-main);
   display: block;
-  font-size: 32px;
+  font-size: 30px;
+  font-weight: 700;
   margin: 8px 0;
 }
 
@@ -262,7 +267,7 @@
 
 .matrix-shell {
   background: rgba(16, 33, 63, 0.76);
-  border: 1px solid rgba(30, 78, 120, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.12);
   border-radius: 16px;
   overflow-x: auto;
 }
@@ -275,8 +280,8 @@
 
 .matrix-table th,
 .matrix-table td {
-  border-bottom: 1px solid rgba(30, 78, 120, 0.5);
-  border-right: 1px solid rgba(30, 78, 120, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-right: 1px solid rgba(148, 163, 184, 0.08);
   padding: 16px;
   text-align: left;
   vertical-align: top;

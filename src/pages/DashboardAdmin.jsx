@@ -48,8 +48,8 @@ export default function DashboardAdmin() {
 
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
-    { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || '-' },
-    { key: 'supervisor', header: 'Supervisor', render: (row) => row.supervisor_id },
+    { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || row.evaluados?.unidad || '-' },
+    { key: 'supervisor', header: 'Supervisor', render: (row) => row.profiles?.full_name || 'Supervisor asignado' },
     { key: 'estado', header: 'Estado', render: (row) => <StatusBadge status={row.estado} /> },
     { key: 'resultado', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado?.resultado_final} /> },
     { key: 'limite', header: 'Fecha límite', render: (row) => formatDate(row.fecha_limite) },
@@ -67,11 +67,11 @@ export default function DashboardAdmin() {
           <Logo size="sm" showText={false} />
           <span className="eyebrow">Administrador</span>
           <h1>Control de evaluaciones</h1>
-          <p>Gestiona diagnósticos, perfiles, resultados y brechas por área operativa.</p>
+          <p>Monitorea resultados, brechas y avance por perfil.</p>
         </div>
         <div className="hero-actions">
-          <Link className="primary-button compact" to="/resultados">Ver resultados</Link>
-          <Link className="secondary-button" to="/admin/evaluaciones">Gestionar evaluaciones</Link>
+          <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluación</Link>
+          <Link className="secondary-button" to="/resultados">Ver resultados</Link>
         </div>
       </div>
 
@@ -79,10 +79,9 @@ export default function DashboardAdmin() {
 
       <div className="metrics-grid">
         <MetricCard title="Total evaluados" value={new Set(rows.map((row) => row.evaluado_id)).size} />
-        <MetricCard title="Evaluaciones asignadas" value={assigned} />
-        <MetricCard title="Diagnósticos completados" value={completed} tone="success" />
-        <MetricCard title="Evaluaciones pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
-        <MetricCard title="Evaluaciones vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
+        <MetricCard title="Completadas" value={completed} tone="success" />
+        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
+        <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
         <MetricCard title="Puntaje promedio" value={formatPercent(average)} />
         <MetricCard title="Aptos" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO).length} tone="success" />
         <MetricCard title="Aptos con refuerzo" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO_REFUERZO).length} tone="warning" />
@@ -94,7 +93,7 @@ export default function DashboardAdmin() {
       <div className="filters-bar">
         <input type="date" value={filters.fecha} onChange={(event) => setFilters({ ...filters, fecha: event.target.value })} />
         <input placeholder="Campaña" value={filters.campana} onChange={(event) => setFilters({ ...filters, campana: event.target.value })} />
-        <input placeholder="Supervisor ID" value={filters.supervisor} onChange={(event) => setFilters({ ...filters, supervisor: event.target.value })} />
+        <input placeholder="Supervisor" value={filters.supervisor} onChange={(event) => setFilters({ ...filters, supervisor: event.target.value })} />
         <select value={filters.estado} onChange={(event) => setFilters({ ...filters, estado: event.target.value })}>
           <option value="">Todos los estados</option>
           <option value="asignada">Asignada</option>

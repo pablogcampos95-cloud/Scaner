@@ -41,7 +41,7 @@ export default function AdminEvaluations({ mode = 'list' }) {
           <div>
             <span className="eyebrow">Administrador</span>
             <h1>Nueva evaluación</h1>
-            <p>Crea una evaluación dinámica para asignarla a supervisores y evaluados.</p>
+            <p>Configura una prueba y asígnala por perfil.</p>
           </div>
         </div>
         <EvaluationBuilder profile={profile} onSaved={(evaluation) => navigate(`/admin/evaluaciones/${evaluation.id}/preguntas`)} />
@@ -141,9 +141,9 @@ export default function AdminEvaluations({ mode = 'list' }) {
         <div>
           <span className="eyebrow">Administrador</span>
           <h1>Evaluaciones dinámicas</h1>
-          <p>Crea, edita y activa evaluaciones con preguntas automáticas, manuales, audio y mini hojas de cálculo.</p>
+          <p>Gestiona pruebas con preguntas automáticas, manuales, audio y mini hojas de cálculo.</p>
         </div>
-        <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Crear nueva evaluación</Link>
+        <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluación</Link>
       </div>
       {state.error ? <p className="alert error">{state.error}</p> : null}
       <DataTable columns={columns} rows={state.rows} loading={state.loading} />
