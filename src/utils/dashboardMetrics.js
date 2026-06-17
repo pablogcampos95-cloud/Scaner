@@ -32,14 +32,14 @@ export function getResultsDistributionData(results = []) {
     Aptos: 0,
     'Aptos con refuerzo': 0,
     'No aptos temporales': 0,
-    'Pendiente de revision': 0,
+    'Pendiente de revisión': 0,
   };
 
   results.forEach((result) => {
     if (result.resultado_final === RESULT_LABELS.APTO) counts.Aptos += 1;
     else if (result.resultado_final === RESULT_LABELS.APTO_REFUERZO) counts['Aptos con refuerzo'] += 1;
     else if (result.resultado_final === RESULT_LABELS.NO_APTO) counts['No aptos temporales'] += 1;
-    else if (String(result.resultado_final || '').toLowerCase().includes('revision')) counts['Pendiente de revision'] += 1;
+    else if (String(result.resultado_final || '').toLowerCase().includes('revision')) counts['Pendiente de revisión'] += 1;
   });
 
   return Object.entries(counts).map(([name, value]) => ({ name, value }));
@@ -66,7 +66,7 @@ export function getProfileScoreData(results = [], fallbackLabel = 'perfil') {
     name,
     value: data.count ? Math.round(data.total / data.count) : 0,
     hasData: data.count > 0,
-    emptyLabel: `Aun no hay datos suficientes por ${fallbackLabel}.`,
+    emptyLabel: `Aún no hay datos suficientes por ${fallbackLabel}.`,
   }));
 }
 

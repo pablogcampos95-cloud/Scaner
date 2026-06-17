@@ -58,11 +58,11 @@ export default function DashboardAdmin() {
 
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
-    { key: 'campana', header: 'Campana', render: (row) => row.evaluados?.campana || row.evaluados?.unidad || '-' },
+    { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || row.evaluados?.unidad || '-' },
     { key: 'supervisor', header: 'Supervisor', render: (row) => row.profiles?.full_name || 'Supervisor asignado' },
     { key: 'estado', header: 'Estado', render: (row) => <StatusBadge status={row.estado} /> },
     { key: 'resultado', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado?.resultado_final} /> },
-    { key: 'limite', header: 'Fecha limite', render: (row) => formatDate(row.fecha_limite) },
+    { key: 'limite', header: 'Fecha límite', render: (row) => formatDate(row.fecha_limite) },
     {
       key: 'acciones',
       header: 'Acciones',
@@ -80,7 +80,7 @@ export default function DashboardAdmin() {
           <p>Monitorea resultados, brechas y avance por perfil.</p>
         </div>
         <div className="hero-actions">
-          <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluacion</Link>
+          <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluación</Link>
           <Link className="secondary-button" to="/resultados">Ver resultados</Link>
         </div>
       </div>
@@ -91,6 +91,7 @@ export default function DashboardAdmin() {
         <div>
           <span className="eyebrow">Resumen ejecutivo</span>
           <h2>Indicadores visuales principales</h2>
+          <p>Estado general de evaluaciones y resultados.</p>
         </div>
       </div>
 
@@ -111,9 +112,9 @@ export default function DashboardAdmin() {
         <div><span>Total evaluados</span><strong>{indicators.uniqueEvaluados}</strong></div>
         <div><span>Evaluaciones asignadas</span><strong>{indicators.assigned}</strong></div>
         <div><span>Puntaje promedio</span><strong>{formatPercent(indicators.average)}</strong></div>
-        <div><span>Areas con evaluados</span><strong>{indicators.areas}</strong></div>
+        <div><span>Áreas con evaluados</span><strong>{indicators.areas}</strong></div>
         <div><span>Perfiles con evaluados</span><strong>{indicators.perfiles}</strong></div>
-        <div><span>Diagnosticos completados</span><strong>{indicators.completed}</strong></div>
+        <div><span>Diagnósticos completados</span><strong>{indicators.completed}</strong></div>
         <div><span>Evaluaciones vencidas</span><strong>{indicators.expired}</strong></div>
         <div><span>Aptos</span><strong>{indicators.aptos}</strong></div>
         <div><span>Aptos con refuerzo</span><strong>{indicators.aptosRefuerzo}</strong></div>
@@ -122,7 +123,7 @@ export default function DashboardAdmin() {
 
       <div className="filters-bar">
         <input type="date" value={filters.fecha} onChange={(event) => setFilters({ ...filters, fecha: event.target.value })} />
-        <input placeholder="Campana" value={filters.campana} onChange={(event) => setFilters({ ...filters, campana: event.target.value })} />
+        <input placeholder="Campaña" value={filters.campana} onChange={(event) => setFilters({ ...filters, campana: event.target.value })} />
         <input placeholder="Supervisor" value={filters.supervisor} onChange={(event) => setFilters({ ...filters, supervisor: event.target.value })} />
         <select value={filters.estado} onChange={(event) => setFilters({ ...filters, estado: event.target.value })}>
           <option value="">Todos los estados</option>

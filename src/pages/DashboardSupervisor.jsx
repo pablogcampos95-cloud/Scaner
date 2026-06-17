@@ -50,7 +50,7 @@ export default function DashboardSupervisor() {
   const handleResend = async (row) => {
     try {
       const response = await sendEvaluationInvitation({ asignacion: row, evaluado: row.evaluados });
-      setState((prev) => ({ ...prev, notice: `Invitacion enviada: ${response.publicUrl}` }));
+      setState((prev) => ({ ...prev, notice: `Invitación enviada: ${response.publicUrl}` }));
       loadData();
     } catch (error) {
       setState((prev) => ({ ...prev, error: error.message }));
@@ -59,15 +59,15 @@ export default function DashboardSupervisor() {
 
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
-    { key: 'dni', header: 'DNI/codigo', render: (row) => row.evaluados?.dni_codigo || '-' },
+    { key: 'dni', header: 'DNI/código', render: (row) => row.evaluados?.dni_codigo || '-' },
     { key: 'correo', header: 'Correo', render: (row) => row.evaluados?.correo || '-' },
-    { key: 'area', header: 'Area', render: (row) => row.evaluados?.areas?.nombre || '-' },
+    { key: 'area', header: 'Área', render: (row) => row.evaluados?.areas?.nombre || '-' },
     { key: 'perfil', header: 'Perfil', render: (row) => row.evaluados?.perfiles_operativos?.nombre || '-' },
-    { key: 'campana', header: 'Campana/unidad', render: (row) => row.evaluados?.unidad || row.evaluados?.campana || '-' },
+    { key: 'campana', header: 'Campaña/unidad', render: (row) => row.evaluados?.unidad || row.evaluados?.campana || '-' },
     { key: 'cargo', header: 'Cargo', render: (row) => row.evaluados?.cargo_especifico || row.evaluados?.cargo || '-' },
     { key: 'estado', header: 'Estado', render: (row) => <StatusBadge status={row.estado} /> },
     { key: 'resultado', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado?.resultado_final} /> },
-    { key: 'limite', header: 'Fecha limite', render: (row) => formatDate(row.fecha_limite) },
+    { key: 'limite', header: 'Fecha límite', render: (row) => formatDate(row.fecha_limite) },
     {
       key: 'acciones',
       header: 'Acciones',
@@ -91,7 +91,7 @@ export default function DashboardSupervisor() {
         </div>
         <div className="hero-actions">
           <Link className="primary-button compact" to="/registrar-evaluado">Registrar evaluado</Link>
-          <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluacion</Link>
+          <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluación</Link>
           <Link className="secondary-button" to="/resultados">Ver resultados</Link>
         </div>
       </div>
@@ -103,13 +103,14 @@ export default function DashboardSupervisor() {
         <div>
           <span className="eyebrow">Resumen ejecutivo</span>
           <h2>Indicadores visuales principales</h2>
+          <p>Estado general de evaluaciones y resultados.</p>
         </div>
       </div>
 
       <div className="charts-grid">
         <EvaluationStatusChart title="Estado de mis evaluaciones" data={statusData} />
         <ResultsDistributionChart title="Resultados de mis evaluados" data={resultData} />
-        <ProfileScoreChart title="Puntaje promedio por area o perfil" data={scoreData} />
+        <ProfileScoreChart title="Puntaje promedio por área o perfil" data={scoreData} />
       </div>
 
       <div className="section-heading compact-heading">
