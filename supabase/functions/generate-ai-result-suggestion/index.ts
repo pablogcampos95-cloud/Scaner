@@ -151,34 +151,39 @@ Deno.serve(async (request) => {
     let provider = 'fallback';
 
     if (apiKey) {
-      const prompt = compactKeywords(result);
+      try {
+        const prompt = compactKeywords(result);
 
-      const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model,
-          input: [
-            {
-              role: 'system',
-              content: 'Actua como evaluador BPO. Personaliza con los porcentajes entregados y el rol postulado. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 45 palabras en total. Sin saludos ni texto adicional.',
-            },
-            {
-              role: 'user',
-              content: `Resultados: ${JSON.stringify(prompt)}. Menciona al menos un puntaje especifico y contextualiza la recomendacion con el rol postulado.`,
-            },
-          ],
-          max_output_tokens: 110,
-        }),
-      });
+        const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            input: [
+              {
+                role: 'system',
+                content: 'Actua como evaluador BPO. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
+              },
+              {
+                role: 'user',
+                content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
+              },
+            ],
+            max_output_tokens: 90,
+          }),
+        });
 
-      const openaiData = await openaiResponse.json();
-      if (!openaiResponse.ok) throw new Error(openaiData?.error?.message || 'OpenAI no pudo generar la sugerencia.');
-      suggestion = getOutputText(openaiData) || suggestion;
-      provider = 'openai';
+        const openaiData = await openaiResponse.json();
+        if (!openaiResponse.ok) throw new Error(openaiData?.error?.message || 'OpenAI no pudo generar la sugerencia.');
+        suggestion = getOutputText(openaiData) || suggestion;
+        provider = 'openai';
+      } catch (openaiError) {
+        console.error('OpenAI suggestion failed', openaiError);
+        provider = 'fallback_openai_error';
+      }
     }
 
     const updated = await supabaseRequest(`/rest/v1/resultados?id=eq.${encodeURIComponent(resultado_id)}`, {

@@ -13,7 +13,15 @@ export async function generateResultSuggestion(resultadoId, force = false) {
   });
 
   if (error) {
-    const contextMessage = error.context?.error || error.context?.message;
+    let contextMessage = error.context?.error || error.context?.message;
+    if (!contextMessage && typeof error.context?.json === 'function') {
+      try {
+        const contextBody = await error.context.json();
+        contextMessage = contextBody?.error || contextBody?.message;
+      } catch {
+        contextMessage = '';
+      }
+    }
     throw new Error(contextMessage || error.message);
   }
   if (data?.error) throw new Error(data.error);

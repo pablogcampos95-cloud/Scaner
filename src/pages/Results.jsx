@@ -123,7 +123,7 @@ export default function Results() {
           <div className="ai-suggestion-box">
             <span className="eyebrow">Sugerencia IA</span>
             {result.ai_suggestion ? <p>{result.ai_suggestion}</p> : <p className="demo-note">Genera una sugerencia breve con IA para complementar el resultado.</p>}
-            {state.aiProvider === 'fallback' ? <small className="demo-note">Respuesta generada por regla local. Revisa OPENAI_API_KEY si esperabas OpenAI.</small> : null}
+            {state.aiProvider?.startsWith('fallback') ? <small className="demo-note">Respuesta generada con regla local contextual. Revisa OPENAI_API_KEY si esperabas respuesta de OpenAI.</small> : null}
             {state.aiError ? <p className="alert error">{state.aiError}</p> : null}
             <button className="secondary-button compact" type="button" onClick={() => handleGenerateSuggestion(Boolean(result.ai_suggestion))} disabled={state.aiLoading}>
               {state.aiLoading ? 'Generando...' : result.ai_suggestion ? 'Regenerar sugerencia IA' : 'Generar sugerencia IA'}
