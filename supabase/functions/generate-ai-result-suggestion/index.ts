@@ -63,6 +63,14 @@ function getOutputText(response: any) {
   return content.map((item: any) => item.text || '').join(' ').trim();
 }
 
+function getSafeErrorMessage(error: unknown) {
+  const rawMessage = error instanceof Error ? error.message : String(error || 'OpenAI no respondio.');
+  return rawMessage
+    .replace(/sk-[A-Za-z0-9_-]+/g, '[api-key]')
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [token]')
+    .slice(0, 220);
+}
+
 function getRoleLabel(result: any) {
   return [
     result.evaluados?.perfiles_operativos?.nombre,
@@ -146,9 +154,10 @@ Deno.serve(async (request) => {
     }
 
     const apiKey = Deno.env.get('OPENAI_API_KEY');
-    const model = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-mini';
+    const model = Deno.env.get('OPENAI_MODEL') || 'gpt-4o-mini';
     let suggestion = fallbackSuggestion(result);
     let provider = 'fallback';
+    let providerWarning = '';
 
     if (apiKey) {
       try {
@@ -183,6 +192,7 @@ Deno.serve(async (request) => {
       } catch (openaiError) {
         console.error('OpenAI suggestion failed', openaiError);
         provider = 'fallback_openai_error';
+        providerWarning = getSafeErrorMessage(openaiError);
       }
     }
 
@@ -194,7 +204,13 @@ Deno.serve(async (request) => {
       }),
     });
 
-    return jsonResponse({ suggestion: updated?.[0]?.ai_suggestion || suggestion, cached: false, provider });
+    return jsonResponse({
+      suggestion: updated?.[0]?.ai_suggestion || suggestion,
+      cached: false,
+      provider,
+      warning: providerWarning,
+      model: provider === 'openai' ? model : undefined,
+    });
   } catch (error) {
     return jsonResponse({ error: error instanceof Error ? error.message : 'Error inesperado.' }, 500);
   }
