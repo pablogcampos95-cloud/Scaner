@@ -1,13 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import EvaluationStatusChart from '../components/charts/EvaluationStatusChart.jsx';
+import ProfileScoreChart from '../components/charts/ProfileScoreChart.jsx';
+import ResultsDistributionChart from '../components/charts/ResultsDistributionChart.jsx';
 import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
-import MetricCard from '../components/MetricCard.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import { listAsignaciones } from '../services/asignacionesService.js';
 import { listResultados } from '../services/resultadosService.js';
 import { RESULT_LABELS } from '../utils/constants.js';
+import {
+  getDashboardIndicators,
+  getEvaluationStatusData,
+  getProfileScoreData,
+  getResultsDistributionData,
+} from '../utils/dashboardMetrics.js';
 import { formatDate, formatPercent } from '../utils/formatters.js';
 
 export default function DashboardAdmin() {
@@ -35,24 +43,26 @@ export default function DashboardAdmin() {
       (!filters.campana || evaluado.campana?.toLowerCase().includes(filters.campana.toLowerCase())) &&
       (!filters.estado || row.estado === filters.estado) &&
       (!filters.resultado || row.resultado?.resultado_final === filters.resultado) &&
-      (!filters.supervisor || row.supervisor_id?.toLowerCase().includes(filters.supervisor.toLowerCase())) &&
+      (!filters.supervisor || row.profiles?.full_name?.toLowerCase().includes(filters.supervisor.toLowerCase())) &&
       (!filters.fecha || createdDate === filters.fecha)
     );
   });
 
-  const completed = rows.filter((row) => row.estado === 'completada').length;
-  const assigned = rows.length;
-  const average = data.resultados.length
-    ? Math.round(data.resultados.reduce((sum, item) => sum + Number(item.promedio_general || 0), 0) / data.resultados.length)
-    : 0;
+  const indicators = useMemo(
+    () => getDashboardIndicators({ assignments: rows, results: data.resultados, rows }),
+    [rows, data.resultados],
+  );
+  const statusData = useMemo(() => getEvaluationStatusData(rows), [rows]);
+  const resultData = useMemo(() => getResultsDistributionData(data.resultados), [data.resultados]);
+  const profileData = useMemo(() => getProfileScoreData(data.resultados, 'perfil'), [data.resultados]);
 
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
-    { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || row.evaluados?.unidad || '-' },
+    { key: 'campana', header: 'Campana', render: (row) => row.evaluados?.campana || row.evaluados?.unidad || '-' },
     { key: 'supervisor', header: 'Supervisor', render: (row) => row.profiles?.full_name || 'Supervisor asignado' },
     { key: 'estado', header: 'Estado', render: (row) => <StatusBadge status={row.estado} /> },
     { key: 'resultado', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado?.resultado_final} /> },
-    { key: 'limite', header: 'Fecha límite', render: (row) => formatDate(row.fecha_limite) },
+    { key: 'limite', header: 'Fecha limite', render: (row) => formatDate(row.fecha_limite) },
     {
       key: 'acciones',
       header: 'Acciones',
@@ -70,29 +80,49 @@ export default function DashboardAdmin() {
           <p>Monitorea resultados, brechas y avance por perfil.</p>
         </div>
         <div className="hero-actions">
-          <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluación</Link>
+          <Link className="primary-button compact" to="/admin/evaluaciones/nueva">Nueva evaluacion</Link>
           <Link className="secondary-button" to="/resultados">Ver resultados</Link>
         </div>
       </div>
 
       {data.error ? <p className="alert error">{data.error}</p> : null}
 
-      <div className="metrics-grid">
-        <MetricCard title="Total evaluados" value={new Set(rows.map((row) => row.evaluado_id)).size} />
-        <MetricCard title="Completadas" value={completed} tone="success" />
-        <MetricCard title="Pendientes" value={rows.filter((row) => ['asignada', 'enviada', 'pendiente'].includes(row.estado)).length} />
-        <MetricCard title="Vencidas" value={rows.filter((row) => row.estado === 'vencida').length} tone="danger" />
-        <MetricCard title="Puntaje promedio" value={formatPercent(average)} />
-        <MetricCard title="Aptos" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO).length} tone="success" />
-        <MetricCard title="Aptos con refuerzo" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.APTO_REFUERZO).length} tone="warning" />
-        <MetricCard title="No aptos temporales" value={data.resultados.filter((row) => row.resultado_final === RESULT_LABELS.NO_APTO).length} tone="danger" />
-        <MetricCard title="Áreas con evaluados" value={new Set(rows.map((row) => row.evaluados?.area_id).filter(Boolean)).size} />
-        <MetricCard title="Perfiles con evaluados" value={new Set(rows.map((row) => row.evaluados?.perfil_operativo_id).filter(Boolean)).size} />
+      <div className="section-heading">
+        <div>
+          <span className="eyebrow">Resumen ejecutivo</span>
+          <h2>Indicadores visuales principales</h2>
+        </div>
+      </div>
+
+      <div className="charts-grid">
+        <EvaluationStatusChart data={statusData} />
+        <ResultsDistributionChart data={resultData} />
+        <ProfileScoreChart data={profileData} />
+      </div>
+
+      <div className="section-heading compact-heading">
+        <div>
+          <span className="eyebrow">Indicadores clave</span>
+          <h2>Resumen operativo</h2>
+        </div>
+      </div>
+
+      <div className="secondary-indicators">
+        <div><span>Total evaluados</span><strong>{indicators.uniqueEvaluados}</strong></div>
+        <div><span>Evaluaciones asignadas</span><strong>{indicators.assigned}</strong></div>
+        <div><span>Puntaje promedio</span><strong>{formatPercent(indicators.average)}</strong></div>
+        <div><span>Areas con evaluados</span><strong>{indicators.areas}</strong></div>
+        <div><span>Perfiles con evaluados</span><strong>{indicators.perfiles}</strong></div>
+        <div><span>Diagnosticos completados</span><strong>{indicators.completed}</strong></div>
+        <div><span>Evaluaciones vencidas</span><strong>{indicators.expired}</strong></div>
+        <div><span>Aptos</span><strong>{indicators.aptos}</strong></div>
+        <div><span>Aptos con refuerzo</span><strong>{indicators.aptosRefuerzo}</strong></div>
+        <div><span>No aptos temporales</span><strong>{indicators.noAptos}</strong></div>
       </div>
 
       <div className="filters-bar">
         <input type="date" value={filters.fecha} onChange={(event) => setFilters({ ...filters, fecha: event.target.value })} />
-        <input placeholder="Campaña" value={filters.campana} onChange={(event) => setFilters({ ...filters, campana: event.target.value })} />
+        <input placeholder="Campana" value={filters.campana} onChange={(event) => setFilters({ ...filters, campana: event.target.value })} />
         <input placeholder="Supervisor" value={filters.supervisor} onChange={(event) => setFilters({ ...filters, supervisor: event.target.value })} />
         <select value={filters.estado} onChange={(event) => setFilters({ ...filters, estado: event.target.value })}>
           <option value="">Todos los estados</option>
