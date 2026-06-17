@@ -60,15 +60,34 @@ function getOutputText(response: any) {
 function fallbackSuggestion(result: any) {
   const average = Number(result.promedio_general || 0);
   if (result.estado_resultado === 'pendiente_revision') {
-    return 'Avanzar con revision: hay respuestas manuales pendientes antes de decidir.\nRevisar evidencia y confirmar ajuste al perfil postulado.';
+    return '- Fortaleza: evidencia disponible.\n- Debilidad: revisión pendiente.\n- Consejo: calificar manuales antes de decidir.';
   }
   if (average >= 80) {
-    return 'Recomendacion IA: avanzar con el postulante.\nEl resultado es consistente para iniciar en el rol con seguimiento ligero.';
+    return '- Fortaleza: dominio sólido.\n- Debilidad: validar adaptación.\n- Consejo: avanzar con seguimiento.';
   }
   if (average >= 60) {
-    return 'Recomendacion IA: avanzar con refuerzo.\nValidar brechas del rol postulado antes de asignar tareas criticas.';
+    return '- Fortaleza: base suficiente.\n- Debilidad: brechas puntuales.\n- Consejo: avanzar con refuerzo.';
   }
-  return 'Recomendacion IA: no avanzar por ahora.\nSe sugiere nivelacion previa y nueva evaluacion para el rol postulado.';
+  return '- Fortaleza: intento completo.\n- Debilidad: bajo desempeño.\n- Consejo: no avanzar aún.';
+}
+
+function compactKeywords(result: any) {
+  const role = [
+    result.evaluados?.perfiles_operativos?.nombre,
+    result.evaluados?.areas?.nombre,
+    result.evaluados?.cargo_especifico || result.evaluados?.cargo,
+  ].filter(Boolean).join(' / ') || 'No definido';
+
+  return {
+    rol_postulado: role,
+    resultado: result.resultado_final,
+    promedio: result.promedio_general,
+    pc: result.puntaje_pc,
+    excel: result.puntaje_excel,
+    etica: result.puntaje_etica,
+    kpis: result.puntaje_kpis,
+    estado: result.estado_resultado || 'finalizado',
+  };
 }
 
 Deno.serve(async (request) => {
@@ -102,23 +121,7 @@ Deno.serve(async (request) => {
     let provider = 'fallback';
 
     if (apiKey) {
-      const prompt = {
-        posicion_postulada: {
-          area: result.evaluados?.areas?.nombre || 'No definida',
-          perfil_operativo: result.evaluados?.perfiles_operativos?.nombre || 'No definido',
-          cargo: result.evaluados?.cargo_especifico || result.evaluados?.cargo || 'No definido',
-          unidad: result.evaluados?.unidad || result.evaluados?.campana || 'No definida',
-        },
-        resultado_final: result.resultado_final,
-        promedio_general: result.promedio_general,
-        puntajes: {
-          pc: result.puntaje_pc,
-          excel: result.puntaje_excel,
-          etica: result.puntaje_etica,
-          kpis: result.puntaje_kpis,
-        },
-        estado_resultado: result.estado_resultado,
-      };
+      const prompt = compactKeywords(result);
 
       const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
         method: 'POST',
@@ -131,14 +134,14 @@ Deno.serve(async (request) => {
           input: [
             {
               role: 'system',
-              content: 'Eres un asistente de seleccion para una plataforma de diagnostico BPO. Usa unicamente la posicion postulada y el dashboard de resultados entregado. Responde maximo 2 lineas. Debe indicar claramente si recomiendas avanzar, avanzar con refuerzo o no avanzar. No inventes datos.',
+              content: 'Actúa como evaluador. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Máximo 30 palabras en total. Sin saludos ni texto adicional.',
             },
             {
               role: 'user',
-              content: `Da una recomendacion breve para este postulante:\n${JSON.stringify(prompt)}`,
+              content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes o palabras clave, no texto largo.`,
             },
           ],
-          max_output_tokens: 90,
+          max_output_tokens: 80,
         }),
       });
 

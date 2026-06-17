@@ -3,7 +3,7 @@ import { isSupabaseConfigured, supabase } from './supabaseClient.js';
 export async function generateResultSuggestion(resultadoId, force = false) {
   if (!isSupabaseConfigured) {
     return {
-      suggestion: 'Sugerencia IA demo: priorizar una retroalimentación breve y un plan de refuerzo focalizado en los módulos con menor puntaje.',
+      suggestion: '- Fortaleza: base evaluable.\n- Debilidad: brechas por validar.\n- Consejo: revisar puntajes críticos.',
       provider: 'demo',
     };
   }
