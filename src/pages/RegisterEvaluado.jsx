@@ -79,13 +79,13 @@ export default function RegisterEvaluado() {
       <form className="form-card modern-form" onSubmit={handleSubmit}>
         <div className="form-grid">
           <label>Nombre completo<input name="nombre_completo" value={values.nombre_completo} onChange={handleChange} />{errors.nombre_completo ? <small className="field-error">{errors.nombre_completo}</small> : null}</label>
-          <label>DNI o codigo<input name="dni_codigo" value={values.dni_codigo} onChange={handleChange} />{errors.dni_codigo ? <small className="field-error">{errors.dni_codigo}</small> : null}</label>
+          <label>DNI o código<input name="dni_codigo" value={values.dni_codigo} onChange={handleChange} />{errors.dni_codigo ? <small className="field-error">{errors.dni_codigo}</small> : null}</label>
           <label>Correo<input name="correo" value={values.correo} onChange={handleChange} />{errors.correo ? <small className="field-error">{errors.correo}</small> : null}</label>
-          <label>Telefono<input name="telefono" value={values.telefono} onChange={handleChange} /></label>
+          <label>Teléfono<input name="telefono" value={values.telefono} onChange={handleChange} /></label>
           <label>
-            Area
+            Área
             <select name="area_id" value={values.area_id} onChange={handleChange}>
-              <option value="">Seleccionar area</option>
+              <option value="">Seleccionar área</option>
               {catalogs.areas.map((area) => <option key={area.id} value={area.id}>{area.nombre}</option>)}
             </select>
             {errors.area_id ? <small className="field-error">{errors.area_id}</small> : null}
@@ -98,8 +98,8 @@ export default function RegisterEvaluado() {
             </select>
             {errors.perfil_operativo_id ? <small className="field-error">{errors.perfil_operativo_id}</small> : null}
           </label>
-          <label>Cargo especifico<input name="cargo_especifico" value={values.cargo_especifico} onChange={handleChange} /></label>
-          <label>Campana o unidad<input name="unidad" value={values.unidad} onChange={handleChange} />{errors.unidad ? <small className="field-error">{errors.unidad}</small> : null}</label>
+          <label>Cargo específico<input name="cargo_especifico" value={values.cargo_especifico} onChange={handleChange} /></label>
+          <label>Campaña o unidad<input name="unidad" value={values.unidad} onChange={handleChange} />{errors.unidad ? <small className="field-error">{errors.unidad}</small> : null}</label>
           <label>Sede<input name="sede" value={values.sede} onChange={handleChange} /></label>
           <label>Modalidad<input name="modalidad" value={values.modalidad} onChange={handleChange} /></label>
         </div>
@@ -107,9 +107,9 @@ export default function RegisterEvaluado() {
         <div className="builder-preview">
           <h3>Evaluaciones disponibles para este perfil</h3>
           {values.area_id && values.perfil_operativo_id ? (
-            availablePreview.length ? availablePreview.map((evaluacion) => <span className="badge status--asignada" key={evaluacion.id}>{evaluacion.nombre}</span>) : <p className="demo-note">No hay evaluaciones activas para esta combinacion.</p>
+            availablePreview.length ? availablePreview.map((evaluacion) => <span className="badge status--asignada" key={evaluacion.id}>{evaluacion.nombre}</span>) : <p className="demo-note">No hay evaluaciones activas para esta combinación.</p>
           ) : (
-            <p className="demo-note">Selecciona area y perfil operativo para ver evaluaciones compatibles.</p>
+            <p className="demo-note">Selecciona área y perfil operativo para ver evaluaciones compatibles.</p>
           )}
         </div>
 

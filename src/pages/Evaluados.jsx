@@ -30,12 +30,12 @@ export default function Evaluados() {
 
   const columns = [
     { key: 'nombre_completo', header: 'Nombre completo' },
-    { key: 'dni_codigo', header: 'DNI/codigo' },
+    { key: 'dni_codigo', header: 'DNI/código' },
     { key: 'correo', header: 'Correo' },
-    { key: 'area', header: 'Area', render: (row) => row.areas?.nombre || '-' },
+    { key: 'area', header: 'Área', render: (row) => row.areas?.nombre || '-' },
     { key: 'perfil', header: 'Perfil operativo', render: (row) => row.perfiles_operativos?.nombre || '-' },
-    { key: 'cargo_especifico', header: 'Cargo especifico', render: (row) => row.cargo_especifico || row.cargo || '-' },
-    { key: 'unidad', header: 'Campana/unidad', render: (row) => row.unidad || row.campana || '-' },
+    { key: 'cargo_especifico', header: 'Cargo específico', render: (row) => row.cargo_especifico || row.cargo || '-' },
+    { key: 'unidad', header: 'Campaña/unidad', render: (row) => row.unidad || row.campana || '-' },
     { key: 'evaluaciones_disponibles', header: 'Evaluaciones disponibles', render: (row) => state.availability[row.id]?.length || 0 },
     { key: 'created_at', header: 'Registro', render: (row) => formatDate(row.created_at) },
   ];
@@ -44,21 +44,21 @@ export default function Evaluados() {
     <section className="page-stack">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Gestion</span>
+          <span className="eyebrow">Gestión</span>
           <h1>Evaluados</h1>
         </div>
         {profile.role === 'supervisor' ? <Link className="primary-button compact" to="/registrar-evaluado">Registrar evaluado</Link> : null}
       </div>
       <div className="filters-bar">
         <select value={filters.area} onChange={(event) => setFilters({ ...filters, area: event.target.value })}>
-          <option value="">Todas las areas</option>
+          <option value="">Todas las áreas</option>
           {areas.map((area) => <option key={area.id} value={area.id}>{area.nombre}</option>)}
         </select>
         <select value={filters.perfil} onChange={(event) => setFilters({ ...filters, perfil: event.target.value })}>
           <option value="">Todos los perfiles</option>
           {perfiles.map((perfil) => <option key={perfil.id} value={perfil.id}>{perfil.nombre}</option>)}
         </select>
-        <input placeholder="Campana o unidad" value={filters.unidad} onChange={(event) => setFilters({ ...filters, unidad: event.target.value })} />
+        <input placeholder="Campaña o unidad" value={filters.unidad} onChange={(event) => setFilters({ ...filters, unidad: event.target.value })} />
       </div>
       {state.error ? <p className="alert error">{state.error}</p> : null}
       <DataTable columns={columns} rows={filteredRows} loading={state.loading} />

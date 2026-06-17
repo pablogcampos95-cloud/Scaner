@@ -1,4 +1,8 @@
 .evaluation-page {
+  --text-main: #f8fafc;
+  --text-muted: #afc2d9;
+  --primary: #00c8ff;
+  --primary-2: #1877ff;
   background:
     radial-gradient(circle at top right, rgba(0, 200, 255, 0.16), transparent 34%),
     linear-gradient(135deg, #061426, #071a33);

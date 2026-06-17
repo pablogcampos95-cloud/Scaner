@@ -1,11 +1,9 @@
 .dashboard-hero,
 .result-hero {
   align-items: center;
-  background:
-    radial-gradient(circle at top right, rgba(0, 200, 255, 0.1), transparent 38%),
-    linear-gradient(135deg, rgba(16, 33, 63, 0.9), rgba(7, 26, 51, 0.92));
-  border: 1px solid rgba(148, 163, 184, 0.12);
-  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   box-shadow: var(--shadow);
   display: grid;
   gap: 20px;
@@ -57,8 +55,8 @@
 }
 
 .metric-card {
-  background: linear-gradient(180deg, rgba(16, 33, 63, 0.86), rgba(11, 29, 56, 0.9));
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   display: grid;
   gap: 12px;
@@ -80,20 +78,20 @@
 }
 
 .metric-card--success {
-  border-color: rgba(34, 197, 94, 0.22);
+  border-color: var(--border);
 }
 
 .metric-card--warning {
-  border-color: rgba(250, 204, 21, 0.22);
+  border-color: var(--border);
 }
 
 .metric-card--danger {
-  border-color: rgba(239, 68, 68, 0.22);
+  border-color: var(--border);
 }
 
 .filters-bar {
-  background: rgba(16, 33, 63, 0.7);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   display: grid;
   gap: 12px;
@@ -107,8 +105,8 @@
 }
 
 .table-shell {
-  background: rgba(16, 33, 63, 0.76);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   overflow-x: auto;
 }
@@ -121,21 +119,21 @@
 
 .data-table th,
 .data-table td {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid #eaecf0;
   padding: 16px;
   text-align: left;
   vertical-align: middle;
 }
 
 .data-table th {
-  background: rgba(7, 26, 51, 0.82);
-  color: var(--text-muted);
+  background: var(--surface-soft);
+  color: #475467;
   font-size: 13px;
   font-weight: 600;
 }
 
 .data-table tr:hover td {
-  background: rgba(0, 200, 255, 0.055);
+  background: var(--surface-soft);
 }
 
 .data-table tr:last-child td {
@@ -159,28 +157,38 @@
 
 .status--completada,
 .result--apto {
-  background: rgba(34, 197, 94, 0.14);
-  color: #86efac;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .status--asignada,
 .status--enviada,
 .status--pendiente,
 .result--sin_resultado {
-  background: rgba(0, 200, 255, 0.14);
-  color: #7ddcff;
+  background: #fef3c7;
+  color: #92400e;
 }
 
-.status--en_proceso,
+.status--en_proceso {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .result--apto_con_refuerzo {
-  background: rgba(250, 204, 21, 0.14);
-  color: #fde68a;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status--vencida,
 .result--no_apto_temporal {
-  background: rgba(239, 68, 68, 0.14);
-  color: #fca5a5;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.result--pendiente_de_revisión,
+.result--pendiente_de_revision {
+  background: #e0e7ff;
+  color: #3730a3;
 }
 
 .table-actions {
@@ -211,8 +219,8 @@
 .result-summary > div,
 .module-score,
 .plain-section {
-  background: rgba(16, 33, 63, 0.86);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 18px;
 }
@@ -251,8 +259,8 @@
 }
 
 .ai-suggestion-box {
-  background: rgba(0, 200, 255, 0.08);
-  border: 1px solid rgba(0, 200, 255, 0.22);
+  background: var(--accent-soft);
+  border: 1px solid #bae6fd;
   border-radius: 14px;
   display: grid;
   gap: 10px;
@@ -266,8 +274,8 @@
 }
 
 .matrix-shell {
-  background: rgba(16, 33, 63, 0.76);
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 16px;
   overflow-x: auto;
 }
@@ -280,16 +288,16 @@
 
 .matrix-table th,
 .matrix-table td {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-  border-right: 1px solid rgba(148, 163, 184, 0.08);
+  border-bottom: 1px solid #eaecf0;
+  border-right: 1px solid #eaecf0;
   padding: 16px;
   text-align: left;
   vertical-align: top;
 }
 
 .matrix-table th {
-  background: rgba(7, 26, 51, 0.98);
-  color: var(--text-main);
+  background: var(--surface-soft);
+  color: #475467;
 }
 
 .matrix-table td strong {

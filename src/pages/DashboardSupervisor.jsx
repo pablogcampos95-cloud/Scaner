@@ -76,6 +76,7 @@ export default function DashboardSupervisor() {
         <div className="hero-actions">
           <Link className="primary-button compact" to="/registrar-evaluado">Registrar evaluado</Link>
           <Link className="secondary-button" to="/asignar-evaluacion">Asignar evaluación</Link>
+          <Link className="secondary-button" to="/resultados">Ver resultados</Link>
         </div>
       </div>
 
