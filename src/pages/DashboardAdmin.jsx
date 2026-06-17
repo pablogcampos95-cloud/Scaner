@@ -20,6 +20,7 @@ import { formatDate, formatPercent } from '../utils/formatters.js';
 
 export default function DashboardAdmin() {
   const { profile } = useOutletContext();
+  const firstName = getFirstName(profile);
   const [data, setData] = useState({ asignaciones: [], resultados: [], loading: true, error: '' });
   const [filters, setFilters] = useState({ campana: '', estado: '', resultado: '', supervisor: '', fecha: '' });
 
@@ -76,7 +77,7 @@ export default function DashboardAdmin() {
         <div>
           <div className="hero-kicker">
             <Logo size="sm" showText={false} />
-            <span className="eyebrow">Administrador</span>
+            <span className="eyebrow">Hola, {firstName}</span>
           </div>
           <h1>Control de evaluaciones</h1>
           <p>Monitorea resultados, brechas y avance por perfil.</p>
@@ -147,4 +148,9 @@ export default function DashboardAdmin() {
       <DataTable columns={columns} rows={filteredRows} loading={data.loading} />
     </section>
   );
+}
+
+function getFirstName(profile) {
+  const displayName = profile?.full_name || profile?.email || 'administrador';
+  return displayName.split(' ')[0];
 }

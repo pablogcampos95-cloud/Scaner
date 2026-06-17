@@ -71,6 +71,7 @@ export default function Results() {
       cargo: result.evaluados?.cargo_especifico || result.evaluados?.cargo || 'No definido',
       unidad: result.evaluados?.unidad || result.evaluados?.campana || 'No definida',
     };
+    const averageTone = getScoreTone(result.promedio_general);
     return (
       <section className="page-stack detail-page">
         <div className="result-hero">
@@ -91,22 +92,26 @@ export default function Results() {
           </div>
           <div>
             <span>Promedio general</span>
-            <strong>{formatPercent(result.promedio_general)}</strong>
+            <strong className={`score-value score-value--${averageTone}`}>{formatPercent(result.promedio_general)}</strong>
           </div>
-          <div>
+          <div className="result-summary-date">
             <span>Finalización</span>
             <strong>{formatDateTime(result.created_at)}</strong>
           </div>
         </div>
 
         <div className="module-grid">
-          {MODULES.map((module) => (
-            <article className="module-score" key={module.key}>
-              <span>{module.label}</span>
-              <strong>{formatPercent(result[module.scoreField])}</strong>
-              <small>{getLevelByScore(Number(result[module.scoreField] || 0))}</small>
-            </article>
-          ))}
+          {MODULES.map((module) => {
+            const score = Number(result[module.scoreField] || 0);
+            const tone = getScoreTone(score);
+            return (
+              <article className={`module-score module-score--${tone}`} key={module.key}>
+                <span>{module.label}</span>
+                <strong className={`score-value score-value--${tone}`}>{formatPercent(score)}</strong>
+                <small>{getLevelByScore(score)}</small>
+              </article>
+            );
+          })}
         </div>
 
         <section className="plain-section">
@@ -158,11 +163,11 @@ export default function Results() {
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
     { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || '-' },
-    { key: 'pc', header: 'PC', render: (row) => formatPercent(row.puntaje_pc) },
-    { key: 'excel', header: 'Excel', render: (row) => formatPercent(row.puntaje_excel) },
-    { key: 'etica', header: 'Ética', render: (row) => formatPercent(row.puntaje_etica) },
-    { key: 'kpis', header: 'KPIs', render: (row) => formatPercent(row.puntaje_kpis) },
-    { key: 'promedio_general', header: 'Promedio', render: (row) => formatPercent(row.promedio_general) },
+    { key: 'pc', header: 'PC', render: (row) => <ScoreText score={row.puntaje_pc} /> },
+    { key: 'excel', header: 'Excel', render: (row) => <ScoreText score={row.puntaje_excel} /> },
+    { key: 'etica', header: 'Ética', render: (row) => <ScoreText score={row.puntaje_etica} /> },
+    { key: 'kpis', header: 'KPIs', render: (row) => <ScoreText score={row.puntaje_kpis} /> },
+    { key: 'promedio_general', header: 'Promedio', render: (row) => <ScoreText score={row.promedio_general} /> },
     { key: 'resultado_final', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado_final} /> },
     { key: 'created_at', header: 'Finalización', render: (row) => formatDateTime(row.created_at) },
     { key: 'acciones', header: 'Acciones', render: (row) => <div className="table-actions"><Link to={`/resultados/${row.id}`}>Ver informe</Link></div> },
@@ -229,4 +234,16 @@ export default function Results() {
       <DataTable columns={columns} rows={filteredRows} loading={state.loading} />
     </section>
   );
+}
+
+function ScoreText({ score }) {
+  const tone = getScoreTone(score);
+  return <span className={`score-pill-text score-value--${tone}`}>{formatPercent(score)}</span>;
+}
+
+function getScoreTone(score) {
+  const value = Number(score || 0);
+  if (value >= 80) return 'success';
+  if (value >= 60) return 'warning';
+  return 'danger';
 }

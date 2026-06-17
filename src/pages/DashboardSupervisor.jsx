@@ -21,6 +21,7 @@ import { formatDate, formatPercent } from '../utils/formatters.js';
 
 export default function DashboardSupervisor() {
   const { profile } = useOutletContext();
+  const firstName = getFirstName(profile);
   const [state, setState] = useState({ asignaciones: [], resultados: [], loading: true, error: '', notice: '' });
 
   const loadData = () => {
@@ -86,7 +87,7 @@ export default function DashboardSupervisor() {
         <div>
           <div className="hero-kicker">
             <Logo size="sm" showText={false} />
-            <span className="eyebrow">Supervisor</span>
+            <span className="eyebrow">Hola, {firstName}</span>
           </div>
           <h1>Seguimiento de evaluados</h1>
           <p>Registra postulantes, asigna pruebas y monitorea resultados.</p>
@@ -135,4 +136,9 @@ export default function DashboardSupervisor() {
       <DataTable columns={columns} rows={rows} loading={state.loading} />
     </section>
   );
+}
+
+function getFirstName(profile) {
+  const displayName = profile?.full_name || profile?.email || 'supervisor';
+  return displayName.split(' ')[0];
 }

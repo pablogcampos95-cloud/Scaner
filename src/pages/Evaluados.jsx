@@ -91,7 +91,17 @@ export default function Evaluados() {
     if (!confirmed) return;
     try {
       await deleteEvaluado(row.id);
-      setState((prev) => ({ ...prev, success: 'Evaluado eliminado correctamente.', error: '' }));
+      setState((prev) => {
+        const availability = { ...prev.availability };
+        delete availability[row.id];
+        return {
+          ...prev,
+          rows: prev.rows.filter((item) => item.id !== row.id),
+          availability,
+          success: 'Evaluado eliminado correctamente.',
+          error: '',
+        };
+      });
       load();
     } catch (error) {
       setState((prev) => ({ ...prev, error: error.message, success: '' }));

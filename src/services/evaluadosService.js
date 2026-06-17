@@ -72,7 +72,8 @@ export async function updateEvaluado(id, values) {
 
 export async function deleteEvaluado(id) {
   if (isSupabaseConfigured) {
-    await deleteSupabaseEvaluadoCascade(id);
+    const deletedByRpc = await tryDeleteSupabaseEvaluadoCascadeRpc(id);
+    if (!deletedByRpc) await deleteSupabaseEvaluadoCascade(id);
     return true;
   }
 
@@ -87,6 +88,17 @@ export async function deleteEvaluado(id) {
   return true;
 }
 
+async function tryDeleteSupabaseEvaluadoCascadeRpc(id) {
+  const { error } = await supabase.rpc('delete_evaluado_cascade', { p_evaluado_id: id });
+  if (!error) return true;
+
+  const message = String(error.message || '').toLowerCase();
+  const isMissingFunction = message.includes('function') || message.includes('schema cache') || message.includes('not found');
+  if (isMissingFunction) return false;
+
+  throw new Error(error.message);
+}
+
 async function deleteSupabaseEvaluadoCascade(id) {
   const { data: assignments, error: assignmentError } = await supabase
     .from('asignaciones')
@@ -95,6 +107,7 @@ async function deleteSupabaseEvaluadoCascade(id) {
   if (assignmentError) throw new Error(assignmentError.message);
 
   const assignmentIds = (assignments || []).map((row) => row.id);
+  const responseIds = [];
 
   if (assignmentIds.length) {
     const { data: responses, error: responsesError } = await supabase
@@ -103,20 +116,37 @@ async function deleteSupabaseEvaluadoCascade(id) {
       .in('asignacion_id', assignmentIds);
     if (responsesError) throw new Error(responsesError.message);
 
-    const responseIds = (responses || []).map((row) => row.id);
-    if (responseIds.length) await deleteFrom('manual_reviews', 'response_id', responseIds);
-    await deleteFrom('evaluation_responses', 'asignacion_id', assignmentIds);
-    await deleteFrom('resultados', 'asignacion_id', assignmentIds);
-    await deleteFrom('correos_enviados', 'asignacion_id', assignmentIds);
-    await deleteFrom('asignaciones', 'id', assignmentIds);
+    responseIds.push(...(responses || []).map((row) => row.id));
   }
+
+  const { data: directResponses, error: directResponsesError } = await supabase
+    .from('evaluation_responses')
+    .select('id')
+    .eq('evaluado_id', id);
+  if (directResponsesError) throw new Error(directResponsesError.message);
+  responseIds.push(...(directResponses || []).map((row) => row.id));
+
+  const uniqueResponseIds = [...new Set(responseIds)];
+  if (uniqueResponseIds.length) await deleteIn('manual_reviews', 'response_id', uniqueResponseIds);
+  if (assignmentIds.length) await deleteIn('evaluation_responses', 'asignacion_id', assignmentIds);
+  await deleteEq('evaluation_responses', 'evaluado_id', id);
+  if (assignmentIds.length) await deleteIn('resultados', 'asignacion_id', assignmentIds);
+  await deleteEq('resultados', 'evaluado_id', id);
+  if (assignmentIds.length) await deleteIn('correos_enviados', 'asignacion_id', assignmentIds);
+  if (assignmentIds.length) await deleteIn('asignaciones', 'id', assignmentIds);
+  await deleteEq('asignaciones', 'evaluado_id', id);
 
   const { error } = await supabase.from('evaluados').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
 
-async function deleteFrom(table, column, values) {
+async function deleteIn(table, column, values) {
   if (!values.length) return;
   const { error } = await supabase.from(table).delete().in(column, values);
+  if (error) throw new Error(error.message);
+}
+
+async function deleteEq(table, column, value) {
+  const { error } = await supabase.from(table).delete().eq(column, value);
   if (error) throw new Error(error.message);
 }
