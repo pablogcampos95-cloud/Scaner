@@ -67,24 +67,45 @@ export default function Login() {
               <p>Acceso autorizado.</p>
             </div>
           </div>
+
           <label>
             Correo
-            <input name="email" value={values.email} onChange={handleChange} placeholder="correo@empresa.com" />
+            <input
+              name="email"
+              type="email"
+              value={values.email}
+              onChange={handleChange}
+              placeholder="correo@empresa.com"
+              autoComplete="email"
+              spellCheck="false"
+            />
             {errors.email ? <small className="field-error">{errors.email}</small> : null}
           </label>
+
           <label>
             Contraseña
-            <input name="password" type="password" value={values.password} onChange={handleChange} placeholder="Contraseña" />
+            <input
+              name="password"
+              type="password"
+              value={values.password}
+              onChange={handleChange}
+              placeholder="Contraseña"
+              autoComplete="current-password"
+              spellCheck="false"
+            />
             {errors.password ? <small className="field-error">{errors.password}</small> : null}
           </label>
+
           {status.message ? <p className="alert error">{status.message}</p> : null}
+
           <button className="primary-button" type="submit" disabled={status.submitting}>
             {status.submitting ? 'Validando...' : 'Iniciar sesión'}
           </button>
+
           <p className="demo-note login-note">
             {isSupabaseConfigured
-              ? 'Tus datos están protegidos y se usan solo para fines de evaluación.'
-              : 'Tus datos están protegidos. Modo local: admin@demo.com o supervisor@demo.com.'}
+              ? 'Accede con tus credenciales corporativas.'
+              : 'Accede con tus credenciales corporativas. Modo local: admin@demo.com o supervisor@demo.com.'}
           </p>
         </form>
       </section>
