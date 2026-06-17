@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
@@ -15,17 +16,55 @@ import {
   Users,
 } from 'lucide-react';
 import { signOut } from '../services/authService.js';
+import { listNotifications } from '../services/notificationsService.js';
+import { formatDateTime } from '../utils/formatters.js';
 import { ROLE_LABELS } from '../utils/roles.js';
 import Logo from './Logo.jsx';
 
 export default function Navbar({ profile }) {
   const navigate = useNavigate();
+  const notificationRef = useRef(null);
+  const [search, setSearch] = useState('');
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState({ rows: [], loading: true, error: '' });
   const isAdmin = profile?.role === 'admin';
   const homePath = isAdmin ? '/admin' : '/supervisor';
+
+  useEffect(() => {
+    if (!profile?.id) return;
+    let active = true;
+    listNotifications(profile)
+      .then((rows) => {
+        if (active) setNotifications({ rows, loading: false, error: '' });
+      })
+      .catch((error) => {
+        if (active) setNotifications({ rows: [], loading: false, error: error.message });
+      });
+    return () => {
+      active = false;
+    };
+  }, [profile]);
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (!notificationRef.current?.contains(event.target)) setNotificationsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const unreadCount = useMemo(() => notifications.rows.length, [notifications.rows]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/login', { replace: true });
+  };
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    const query = search.trim();
+    if (!query) return;
+    navigate(`/buscar?q=${encodeURIComponent(query)}`);
   };
 
   const navGroups = [
@@ -40,6 +79,7 @@ export default function Navbar({ profile }) {
         ...(isAdmin ? [{ to: '/admin/evaluaciones', label: 'Evaluaciones', icon: ListChecks }] : []),
         ...(!isAdmin ? [{ to: '/asignar-evaluacion', label: 'Asignar evaluación', icon: UserPlus }] : []),
         { to: '/resultados', label: 'Resultados', icon: BarChart3 },
+        { to: '/reportes', label: 'Reportes', icon: FileBarChart },
       ],
     },
     {
@@ -48,7 +88,6 @@ export default function Navbar({ profile }) {
         ...(isAdmin ? [{ to: '/admin/catalogos', label: 'Áreas y perfiles', icon: Library }] : []),
         ...(isAdmin ? [{ to: '/admin/matriz-evaluaciones', label: 'Matriz de perfiles', icon: Table2 }] : []),
         ...(isAdmin ? [{ to: '/admin/usuarios', label: 'Usuarios', icon: UserCog }] : []),
-        { to: '#reportes', label: 'Reportes', icon: FileBarChart, disabled: true },
         { to: '#configuracion', label: 'Configuración', icon: Settings, disabled: true },
       ],
     },
@@ -90,16 +129,50 @@ export default function Navbar({ profile }) {
       </aside>
 
       <header className="topbar">
-        <div className="topbar-search">
+        <form className="topbar-search" onSubmit={handleSearch}>
           <Search size={18} />
-          <span>Buscar evaluado o campaña</span>
-        </div>
+          <input
+            aria-label="Buscar evaluado o campaña"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar evaluado o campaña"
+          />
+        </form>
 
         <Logo size="sm" showText={false} className="topbar-logo" />
 
-        <button className="icon-button topbar-icon" type="button" aria-label="Notificaciones">
-          <Bell size={18} />
-        </button>
+        <div className="notification-center" ref={notificationRef}>
+          <button className="icon-button topbar-icon notification-button" type="button" aria-label="Notificaciones" onClick={() => setNotificationsOpen((value) => !value)}>
+            <Bell size={18} />
+            {unreadCount ? <span>{unreadCount > 9 ? '9+' : unreadCount}</span> : null}
+          </button>
+
+          {notificationsOpen ? (
+            <div className="notification-panel">
+              <div className="notification-panel__header">
+                <strong>Notificaciones</strong>
+                <small>{isAdmin ? 'Vista general' : 'Mis evaluados'}</small>
+              </div>
+              {notifications.loading ? <p className="notification-empty">Cargando notificaciones...</p> : null}
+              {notifications.error ? <p className="notification-empty">{notifications.error}</p> : null}
+              {!notifications.loading && !notifications.error && notifications.rows.length === 0 ? (
+                <p className="notification-empty">No hay novedades por ahora.</p>
+              ) : null}
+              <div className="notification-list">
+                {notifications.rows.map((item) => (
+                  <Link className={`notification-item notification-item--${item.type}`} to={item.href} key={item.id} onClick={() => setNotificationsOpen(false)}>
+                    <span />
+                    <div>
+                      <strong>{item.title}</strong>
+                      <p>{item.message}</p>
+                      <small>{formatDateTime(item.date)}</small>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         <div className="session-chip">
           <span>

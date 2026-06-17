@@ -16,7 +16,9 @@ import Login from './pages/Login.jsx';
 import ManualReview from './pages/ManualReview.jsx';
 import NotFound from './pages/NotFound.jsx';
 import RegisterEvaluado from './pages/RegisterEvaluado.jsx';
+import Reports from './pages/Reports.jsx';
 import Results from './pages/Results.jsx';
+import SearchResults from './pages/SearchResults.jsx';
 
 export default function App() {
   return (
@@ -46,6 +48,8 @@ export default function App() {
           </Route>
 
           <Route path="/evaluados" element={<Evaluados />} />
+          <Route path="/buscar" element={<SearchResults />} />
+          <Route path="/reportes" element={<Reports />} />
           <Route path="/resultados" element={<Results />} />
           <Route path="/resultados/:id" element={<Results />} />
           <Route path="/resultados/:id/revision" element={<ManualReview />} />
