@@ -184,11 +184,11 @@ Deno.serve(async (request) => {
             messages: [
               {
                 role: 'system',
-                content: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
+                content: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: Fortaleza, Debilidad, Consejo. Maximo 30 palabras. No uses solo numeros ni digas "ninguna". Menciona modulo, rol o decision.',
               },
               {
                 role: 'user',
-                content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
+                content: `Resultados: ${JSON.stringify(prompt)}. Si todo esta en 0 o pendiente de revision, indica que no hay evidencia automatica suficiente y recomienda cerrar la revision manual.`,
               },
             ],
             max_tokens: 90,
