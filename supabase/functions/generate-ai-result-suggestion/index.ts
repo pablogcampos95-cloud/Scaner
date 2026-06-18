@@ -66,13 +66,12 @@ async function getRequester(authorization: string | null) {
   return data;
 }
 
-function getGeminiOutputText(response: any) {
-  const parts = response?.candidates?.flatMap((candidate: any) => candidate.content?.parts || []) || [];
-  return parts.map((part: any) => part.text || '').join(' ').trim();
+function getGroqOutputText(response: any) {
+  return String(response?.choices?.[0]?.message?.content || '').trim();
 }
 
 function getSafeErrorMessage(error: unknown) {
-  const rawMessage = error instanceof Error ? error.message : String(error || 'Gemini no respondio.');
+  const rawMessage = error instanceof Error ? error.message : String(error || 'Groq no respondio.');
   return rawMessage
     .replace(/sk-[A-Za-z0-9_-]+/g, '[api-key]')
     .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [token]')
@@ -162,57 +161,49 @@ Deno.serve(async (request) => {
       return jsonResponse({ suggestion: result.ai_suggestion, cached: true, provider: 'stored' });
     }
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY');
-    const model = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash';
+    const apiKey = Deno.env.get('GROQ_API_KEY');
+    const model = Deno.env.get('GROQ_MODEL') || 'llama-3.3-70b-versatile';
     let suggestion = fallbackSuggestion(result);
     let provider = 'fallback';
     let providerWarning = '';
 
     if (!apiKey) {
-      provider = 'fallback_missing_gemini_key';
-      providerWarning = 'GEMINI_API_KEY no configurada en Supabase secrets.';
+      provider = 'fallback_missing_groq_key';
+      providerWarning = 'GROQ_API_KEY no configurada en Supabase secrets.';
     } else {
       try {
         const prompt = compactKeywords(result);
-        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'x-goog-api-key': apiKey,
+            Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            systemInstruction: {
-              parts: [
-                {
-                  text: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
-                },
-              ],
-            },
-            contents: [
+            model,
+            messages: [
+              {
+                role: 'system',
+                content: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
+              },
               {
                 role: 'user',
-                parts: [
-                  {
-                    text: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
-                  },
-                ],
+                content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
               },
             ],
-            generationConfig: {
-              maxOutputTokens: 90,
-              temperature: 0.3,
-            },
+            max_tokens: 90,
+            temperature: 0.3,
           }),
         });
 
-        const geminiData = await geminiResponse.json();
-        if (!geminiResponse.ok) throw new Error(geminiData?.error?.message || 'Gemini no pudo generar la sugerencia.');
-        suggestion = getGeminiOutputText(geminiData) || suggestion;
-        provider = 'gemini';
-      } catch (geminiError) {
-        console.error('Gemini suggestion failed', geminiError);
-        provider = 'fallback_gemini_error';
-        providerWarning = getSafeErrorMessage(geminiError);
+        const groqData = await groqResponse.json();
+        if (!groqResponse.ok) throw new Error(groqData?.error?.message || 'Groq no pudo generar la sugerencia.');
+        suggestion = getGroqOutputText(groqData) || suggestion;
+        provider = 'groq';
+      } catch (groqError) {
+        console.error('Groq suggestion failed', groqError);
+        provider = 'fallback_groq_error';
+        providerWarning = getSafeErrorMessage(groqError);
       }
     }
 
@@ -229,7 +220,7 @@ Deno.serve(async (request) => {
       cached: false,
       provider,
       warning: providerWarning,
-      model: provider === 'gemini' ? model : undefined,
+      model: provider === 'groq' ? model : undefined,
     });
   } catch (error) {
     const status = error instanceof HttpError ? error.status : 500;

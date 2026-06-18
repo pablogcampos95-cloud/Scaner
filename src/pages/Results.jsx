@@ -127,7 +127,7 @@ export default function Results() {
             {state.aiProvider?.startsWith('fallback') ? (
               <small className="demo-note">
                 Respuesta generada con regla local contextual.
-                {state.aiWarning ? ` Gemini no respondió: ${state.aiWarning}` : ' Revisa GEMINI_API_KEY si esperabas respuesta de Gemini.'}
+                {state.aiWarning ? ` Groq no respondió: ${state.aiWarning}` : ' Revisa GROQ_API_KEY si esperabas respuesta de Groq.'}
               </small>
             ) : null}
             {state.aiError ? <p className="alert error">{state.aiError}</p> : null}
