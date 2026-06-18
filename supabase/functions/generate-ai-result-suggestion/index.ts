@@ -57,17 +57,17 @@ async function getRequester(authorization: string | null) {
   return data;
 }
 
-function getOutputText(response: any) {
-  if (response?.output_text) return String(response.output_text).trim();
-  const content = response?.output?.flatMap((item: any) => item.content || []) || [];
-  return content.map((item: any) => item.text || '').join(' ').trim();
+function getGeminiOutputText(response: any) {
+  const parts = response?.candidates?.flatMap((candidate: any) => candidate.content?.parts || []) || [];
+  return parts.map((part: any) => part.text || '').join(' ').trim();
 }
 
 function getSafeErrorMessage(error: unknown) {
-  const rawMessage = error instanceof Error ? error.message : String(error || 'OpenAI no respondio.');
+  const rawMessage = error instanceof Error ? error.message : String(error || 'Gemini no respondio.');
   return rawMessage
     .replace(/sk-[A-Za-z0-9_-]+/g, '[api-key]')
     .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [token]')
+    .replace(/AIza[A-Za-z0-9_-]+/g, '[api-key]')
     .slice(0, 220);
 }
 
@@ -153,8 +153,8 @@ Deno.serve(async (request) => {
       return jsonResponse({ suggestion: result.ai_suggestion, cached: true, provider: 'stored' });
     }
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY');
-    const model = Deno.env.get('OPENAI_MODEL') || 'gpt-4o-mini';
+    const apiKey = Deno.env.get('GEMINI_API_KEY');
+    const model = Deno.env.get('GEMINI_MODEL') || 'gemini-2.0-flash';
     let suggestion = fallbackSuggestion(result);
     let provider = 'fallback';
     let providerWarning = '';
@@ -162,37 +162,45 @@ Deno.serve(async (request) => {
     if (apiKey) {
       try {
         const prompt = compactKeywords(result);
-
-        const openaiResponse = await fetch('https://api.openai.com/v1/responses', {
+        const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            'x-goog-api-key': apiKey,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model,
-            input: [
-              {
-                role: 'system',
-                content: 'Actua como evaluador BPO. Responde estrictamente en 3 viñetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
-              },
+            systemInstruction: {
+              parts: [
+                {
+                  text: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: 1 fortaleza, 1 debilidad, 1 consejo. Maximo 30 palabras en total. Sin saludos ni texto adicional.',
+                },
+              ],
+            },
+            contents: [
               {
                 role: 'user',
-                content: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
+                parts: [
+                  {
+                    text: `Resultados: ${JSON.stringify(prompt)}. Usa solo puntajes, resultado y rol postulado. Contextualiza la decision con la puntuacion obtenida.`,
+                  },
+                ],
               },
             ],
-            max_output_tokens: 90,
+            generationConfig: {
+              maxOutputTokens: 90,
+              temperature: 0.3,
+            },
           }),
         });
 
-        const openaiData = await openaiResponse.json();
-        if (!openaiResponse.ok) throw new Error(openaiData?.error?.message || 'OpenAI no pudo generar la sugerencia.');
-        suggestion = getOutputText(openaiData) || suggestion;
-        provider = 'openai';
-      } catch (openaiError) {
-        console.error('OpenAI suggestion failed', openaiError);
-        provider = 'fallback_openai_error';
-        providerWarning = getSafeErrorMessage(openaiError);
+        const geminiData = await geminiResponse.json();
+        if (!geminiResponse.ok) throw new Error(geminiData?.error?.message || 'Gemini no pudo generar la sugerencia.');
+        suggestion = getGeminiOutputText(geminiData) || suggestion;
+        provider = 'gemini';
+      } catch (geminiError) {
+        console.error('Gemini suggestion failed', geminiError);
+        provider = 'fallback_gemini_error';
+        providerWarning = getSafeErrorMessage(geminiError);
       }
     }
 
@@ -209,7 +217,7 @@ Deno.serve(async (request) => {
       cached: false,
       provider,
       warning: providerWarning,
-      model: provider === 'openai' ? model : undefined,
+      model: provider === 'gemini' ? model : undefined,
     });
   } catch (error) {
     return jsonResponse({ error: error instanceof Error ? error.message : 'Error inesperado.' }, 500);

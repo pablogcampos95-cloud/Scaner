@@ -127,7 +127,7 @@ export default function Results() {
             {state.aiProvider?.startsWith('fallback') ? (
               <small className="demo-note">
                 Respuesta generada con regla local contextual.
-                {state.aiWarning ? ` OpenAI no respondió: ${state.aiWarning}` : ' Revisa OPENAI_API_KEY si esperabas respuesta de OpenAI.'}
+                {state.aiWarning ? ` Gemini no respondió: ${state.aiWarning}` : ' Revisa GEMINI_API_KEY si esperabas respuesta de Gemini.'}
               </small>
             ) : null}
             {state.aiError ? <p className="alert error">{state.aiError}</p> : null}
