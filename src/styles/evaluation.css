@@ -322,6 +322,7 @@
   }
 
   .evaluation-panel {
+    border-radius: 18px;
     padding: 18px;
   }
 
@@ -329,7 +330,65 @@
     grid-template-columns: 1fr;
   }
 
+  .evaluation-header h1 {
+    font-size: 28px;
+    line-height: 1.12;
+  }
+
+  .evaluation-header p,
+  .question-card p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .evaluation-progress,
+  .question-card,
+  .module-panel {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .question-card h3 {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+
+  .option-row {
+    align-items: flex-start;
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .audio-controls {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .audio-controls button {
+    width: 100%;
+  }
+
+  .sheet-grid {
+    grid-template-columns: 36px repeat(5, minmax(78px, 1fr));
+    min-width: 456px;
+  }
+
+  .sheet-grid input {
+    font-size: 13px;
+    min-height: 36px;
+    padding: 6px;
+  }
+
   .evaluation-actions {
+    flex-direction: column;
+  }
+
+  .completion-panel {
+    margin-top: 6vh;
+  }
+
+  .response-card > div {
+    align-items: flex-start;
     flex-direction: column;
   }
 }

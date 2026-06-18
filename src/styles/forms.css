@@ -473,3 +473,120 @@ textarea::placeholder {
   border: 1px solid rgba(248, 113, 113, 0.26);
   color: #fecaca;
 }
+
+@media (max-width: 760px) {
+  .login-page {
+    padding: 18px;
+    place-items: stretch;
+  }
+
+  .login-panel {
+    gap: 28px;
+    grid-template-columns: 1fr;
+    margin: auto 0;
+  }
+
+  .login-copy {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .login-hero-logo .logo img {
+    height: 96px;
+    width: 96px;
+  }
+
+  .login-copy h1 {
+    font-size: 42px;
+  }
+
+  .login-copy h2 {
+    font-size: 20px;
+  }
+
+  .login-copy p {
+    font-size: 14px;
+  }
+
+  .login-form {
+    border-radius: 20px;
+    padding: 24px;
+  }
+
+  .form-card,
+  .guided-step,
+  .builder-card,
+  .builder-preview {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .form-title {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .form-title.centered {
+    align-items: center;
+  }
+
+  .form-title h2,
+  .builder-panel h2,
+  .builder-card h3 {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .form-title p,
+  .target-selector p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .form-grid,
+  .guided-step,
+  .option-editor,
+  .settings-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-container input,
+  .page-container select,
+  .page-container textarea {
+    border-radius: 10px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  .page-container textarea {
+    min-height: 110px;
+  }
+
+  .form-actions,
+  .section-actions {
+    align-items: stretch;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr;
+  }
+
+  .section-actions input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .target-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .target-row {
+    border-radius: 12px;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .check-row {
+    align-items: flex-start;
+  }
+}
