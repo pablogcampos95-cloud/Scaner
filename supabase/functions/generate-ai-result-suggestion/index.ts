@@ -112,9 +112,9 @@ function fallbackSuggestion(result: any) {
   const role = getRoleLabel(result);
   const { average, strongest, weakest, decision } = getScoreSummary(result);
   if (result.estado_resultado === 'pendiente_revision') {
-    return `- Fortaleza: ${strongest.label} destaca con ${strongest.value}%.\n- Debilidad: hay revision manual pendiente.\n- Consejo: cerrar revision antes de decidir para ${role}.`;
+    return `El resultado requiere revision manual antes de tomar una decision final. Para el rol ${role}, valida las respuestas pendientes y confirma si existe evidencia suficiente para continuar.`;
   }
-  return `- Fortaleza: ${strongest.label} alcanza ${strongest.value}%.\n- Debilidad: ${weakest.label} queda en ${weakest.value}%, promedio ${average}%.\n- Consejo: ${decision} para ${role}.`;
+  return `El resultado sugiere ${decision} con promedio de ${average}%. Para el rol ${role}, considera especialmente el modulo ${weakest.label}, donde obtuvo ${weakest.value}%, antes de continuar.`;
 }
 
 function compactKeywords(result: any) {
@@ -124,6 +124,7 @@ function compactKeywords(result: any) {
   return {
     rol_postulado: role,
     resultado: result.resultado_final,
+    resultado_presentacion: result.resultado_final === 'Apto con refuerzo' ? 'Apto con observacion' : result.resultado_final,
     promedio: average,
     puntaje_mas_alto: `${strongest.label} ${strongest.value}%`,
     puntaje_mas_bajo: `${weakest.label} ${weakest.value}%`,
@@ -184,14 +185,14 @@ Deno.serve(async (request) => {
             messages: [
               {
                 role: 'system',
-                content: 'Actua como evaluador BPO. Responde estrictamente en 3 vinetas: Fortaleza, Debilidad, Consejo. Maximo 30 palabras. No uses solo numeros ni digas "ninguna". Menciona modulo, rol o decision.',
+                content: 'Actua como evaluador senior de assessment BPO. Redacta una recomendacion profesional en espanol, maximo 2 frases y 65 palabras. No uses vinetas. No saludes. No digas "fortaleza" ni "debilidad". Debes mencionar literalmente el rol_postulado y el modulo con puntaje_mas_bajo.',
               },
               {
                 role: 'user',
-                content: `Resultados: ${JSON.stringify(prompt)}. Si todo esta en 0 o pendiente de revision, indica que no hay evidencia automatica suficiente y recomienda cerrar la revision manual.`,
+                content: `Resultados: ${JSON.stringify(prompt)}. Si el resultado es "Apto con refuerzo", mencionalo como "Apto con observacion". Explica que hay puntos importantes por mejorar y que, por el rol postulado, el modulo mas bajo debe considerarse antes de continuar el proceso.`,
               },
             ],
-            max_tokens: 90,
+            max_tokens: 120,
             temperature: 0.3,
           }),
         });
