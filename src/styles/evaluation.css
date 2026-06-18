@@ -266,7 +266,18 @@
 }
 
 .sheet-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   color: var(--text-muted);
+}
+
+.sheet-result span {
+  background: rgba(22, 191, 232, 0.08);
+  border: 1px solid rgba(22, 191, 232, 0.18);
+  border-radius: 999px;
+  font-size: 13px;
+  padding: 6px 10px;
 }
 
 .evaluation-actions {
