@@ -15,6 +15,15 @@ type ScoreItem = {
   value: number;
 };
 
+class HttpError extends Error {
+  status: number;
+
+  constructor(message: string, status = 500) {
+    super(message);
+    this.status = status;
+  }
+}
+
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -47,13 +56,13 @@ async function supabaseRequest(path: string, options: RequestInit = {}) {
 async function getRequester(authorization: string | null) {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-  if (!authorization || !supabaseUrl || !anonKey) throw new Error('Sesion no valida.');
+  if (!authorization || !supabaseUrl || !anonKey) throw new HttpError('Sesion no valida.', 401);
 
   const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: { apikey: anonKey, Authorization: authorization },
   });
   const data = await response.json();
-  if (!response.ok || !data?.id) throw new Error('Sesion no valida.');
+  if (!response.ok || !data?.id) throw new HttpError('Sesion no valida.', 401);
   return data;
 }
 
@@ -159,7 +168,10 @@ Deno.serve(async (request) => {
     let provider = 'fallback';
     let providerWarning = '';
 
-    if (apiKey) {
+    if (!apiKey) {
+      provider = 'fallback_missing_gemini_key';
+      providerWarning = 'GEMINI_API_KEY no configurada en Supabase secrets.';
+    } else {
       try {
         const prompt = compactKeywords(result);
         const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
@@ -220,6 +232,7 @@ Deno.serve(async (request) => {
       model: provider === 'gemini' ? model : undefined,
     });
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Error inesperado.' }, 500);
+    const status = error instanceof HttpError ? error.status : 500;
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Error inesperado.' }, status);
   }
 });
