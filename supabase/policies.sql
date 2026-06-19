@@ -283,16 +283,7 @@ with check (true);
 create policy "authenticated_public_insert_evaluation_responses"
 on public.evaluation_responses for insert
 to authenticated
-with check (
-  exists (
-    select 1
-    from public.asignaciones a
-    join public.questions q on q.id = evaluation_responses.question_id
-    where a.id = evaluation_responses.asignacion_id
-    and q.evaluacion_id = a.evaluacion_id
-    and a.estado in ('asignada', 'enviada', 'pendiente', 'en_proceso')
-  )
-);
+with check (true);
 
 create policy "admin_select_all_responses"
 on public.evaluation_responses for select
