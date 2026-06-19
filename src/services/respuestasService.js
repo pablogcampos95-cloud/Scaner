@@ -92,13 +92,7 @@ export async function saveDynamicEvaluationResponses({ assignment, evaluation, a
   const summary = summarizeDynamicResult(evaluation.questions || [], responses);
   await saveDynamicResult({ assignment, summary });
 
-  if (isSupabaseConfigured) {
-    const { error } = await supabase
-      .from('asignaciones')
-      .update({ estado: 'completada', fecha_finalizacion: new Date().toISOString() })
-      .eq('id', assignment.id);
-    if (error) throw new Error(error.message);
-  } else {
+  if (!isSupabaseConfigured) {
     updateLocal('asignaciones', assignment.id, { estado: 'completada', fecha_finalizacion: new Date().toISOString() });
   }
 
@@ -125,7 +119,7 @@ export async function saveDynamicResult({ assignment, summary }) {
   };
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('resultados').insert(payload).select().single();
+    const { data, error } = await supabase.rpc('complete_dynamic_assignment_public', { p_payload: payload });
     if (error) throw new Error(error.message);
     return data;
   }
