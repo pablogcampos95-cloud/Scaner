@@ -6,7 +6,7 @@ import { uploadAudioResponse } from './storageService.js';
 
 export async function saveQuestionResponse(payload) {
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('evaluation_responses').insert(payload).select().single();
+    const { data, error } = await supabase.rpc('insert_evaluation_response_public', { p_payload: payload });
     if (error) throw new Error(error.message);
     return data;
   }
