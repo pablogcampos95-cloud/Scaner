@@ -1,4 +1,5 @@
 import { calculateQuestionScore, summarizeDynamicResult } from '../utils/scoreCalculator.js';
+import { gradeSpreadsheetAnswer } from '../utils/spreadsheetGrader.js';
 import { insertLocal, listLocal, updateLocal } from './localStore.js';
 import { isSupabaseConfigured, supabase } from './supabaseClient.js';
 import { uploadAudioResponse } from './storageService.js';
@@ -31,18 +32,18 @@ export async function saveAudioResponse({ asignacionId, questionId, evaluadoId, 
 }
 
 export async function saveSpreadsheetResponse({ asignacionId, questionId, evaluadoId, answerJson, question }) {
-  const score = calculateQuestionScore(question, answerJson);
+  const grading = gradeSpreadsheetAnswer(question?.settings || {}, question?.correct_answer || {}, answerJson, Number(question?.puntaje || 0));
 
   return saveQuestionResponse({
     asignacion_id: asignacionId,
     question_id: questionId,
     evaluado_id: evaluadoId,
     answer_type: 'spreadsheet',
-    answer_json: answerJson,
-    is_correct: score.isCorrect,
-    score_obtained: score.scoreObtained,
-    max_score: score.maxScore,
-    requires_review: score.requiresReview,
+    answer_json: { ...answerJson, grading },
+    is_correct: grading.isCorrect,
+    score_obtained: grading.scoreObtained,
+    max_score: grading.maxScore,
+    requires_review: grading.requiresReview,
   });
 }
 
@@ -72,7 +73,15 @@ export async function saveDynamicEvaluationResponses({ assignment, evaluation, a
         question,
       }));
     } else if (question.question_type === 'spreadsheet') {
-      responses.push(await saveQuestionResponse({ ...base, answer_json: answer }));
+      const grading = gradeSpreadsheetAnswer(question.settings || {}, question.correct_answer || {}, answer, Number(question.puntaje || 0));
+      responses.push(await saveQuestionResponse({
+        ...base,
+        answer_json: { ...answer, grading },
+        is_correct: grading.isCorrect,
+        score_obtained: grading.scoreObtained,
+        max_score: grading.maxScore,
+        requires_review: grading.requiresReview,
+      }));
     } else if (['multiple_choice', 'kpi_numeric'].includes(question.question_type)) {
       responses.push(await saveQuestionResponse({ ...base, answer_json: answer }));
     } else {

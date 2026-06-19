@@ -1,4 +1,5 @@
 import { MODULES, RESULT_LABELS } from './constants.js';
+import { gradeSpreadsheetAnswer } from './spreadsheetGrader.js';
 
 export function getLevelByScore(score) {
   if (score < 60) return 'Básico / Requiere refuerzo';
@@ -109,27 +110,13 @@ export function calculateQuestionScore(question, answer) {
   }
 
   if (type === 'spreadsheet') {
-    const expectedCells = settings.expectedCells || correctAnswer?.expectedCells || null;
-    if (expectedCells && Object.keys(expectedCells).length) {
-      const results = answer?.results || {};
-      const tolerance = Number(settings.tolerance ?? correctAnswer?.tolerance ?? 0);
-      const isCorrect = Object.entries(expectedCells).every(([cell, expected]) => {
-        const normalizedCell = String(cell).toUpperCase();
-        return valuesMatch(expected, results[normalizedCell] ?? results[cell] ?? '', tolerance);
-      });
-      return {
-        scoreObtained: isCorrect ? maxScore : 0,
-        maxScore,
-        isCorrect,
-        requiresReview: !isCorrect && Boolean(settings.reviewOnMismatch),
-      };
-    }
-
-    const expected = String(settings.expectedValue ?? correctAnswer?.expectedValue ?? '').trim();
-    const result = String(answer?.result ?? answer?.calculatedResult ?? '').trim();
-    if (!expected) return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
-    const isCorrect = valuesMatch(expected, result, Number(settings.tolerance ?? correctAnswer?.tolerance ?? 0));
-    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: !isCorrect && Boolean(settings.reviewOnMismatch) };
+    const grading = gradeSpreadsheetAnswer(settings, correctAnswer, answer, maxScore);
+    return {
+      scoreObtained: grading.scoreObtained,
+      maxScore: grading.maxScore,
+      isCorrect: grading.isCorrect,
+      requiresReview: grading.requiresReview,
+    };
   }
 
   if (type === 'kpi_numeric') {
@@ -141,15 +128,6 @@ export function calculateQuestionScore(question, answer) {
   }
 
   return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
-}
-
-function valuesMatch(expected, received, tolerance = 0) {
-  const expectedNumber = Number(expected);
-  const receivedNumber = Number(received);
-  if (Number.isFinite(expectedNumber) && Number.isFinite(receivedNumber)) {
-    return Math.abs(expectedNumber - receivedNumber) <= tolerance;
-  }
-  return String(expected).trim().toLowerCase() === String(received).trim().toLowerCase();
 }
 
 export function summarizeDynamicResult(questions, responses) {

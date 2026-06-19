@@ -53,7 +53,16 @@ export default function QuestionBuilder({ evaluacionId, sections, onCreated }) {
     if (question.question_type === 'single_choice' && options.filter((option) => option.is_correct).length !== 1) return 'Opción única requiere exactamente una respuesta correcta.';
     if (question.question_type === 'multiple_choice' && options.filter((option) => option.is_correct).length < 1) return 'Opción múltiple requiere al menos una respuesta correcta.';
     if (question.question_type === 'audio_response' && !question.instrucciones.trim()) return 'La pregunta de audio debe tener instrucciones.';
-    if (question.question_type === 'spreadsheet' && (!settings.targetCell || !settings.expectedValue)) return 'Spreadsheet requiere celda objetivo y respuesta esperada.';
+    if (question.question_type === 'spreadsheet') {
+      const target = settings.targetCell || settings.targetCells?.[0];
+      const expected = settings.expectedAnswers?.[target] || {};
+      const gradingMode = expected.gradingMode || settings.gradingMode || 'result';
+      if (!question.instrucciones.trim()) return 'Mini hoja requiere instrucciones para el participante.';
+      if (!target) return 'Mini hoja requiere celda objetivo.';
+      if ((settings.lockedCells || []).includes(target)) return 'La celda objetivo no puede estar bloqueada.';
+      if (gradingMode !== 'manual' && gradingMode !== 'formula_exact' && String(expected.expectedValue ?? settings.expectedValue ?? '').trim() === '') return 'Mini hoja requiere resultado esperado.';
+      if (gradingMode === 'formula_exact' && !String(expected.expectedFormula || settings.expectedFormula || '').trim()) return 'Mini hoja requiere fórmula esperada.';
+    }
     if (question.question_type === 'kpi_numeric' && !Number.isFinite(Number(correctAnswer.expected))) return 'KPI requiere respuesta esperada numérica.';
     return '';
   };
@@ -155,7 +164,15 @@ export default function QuestionBuilder({ evaluacionId, sections, onCreated }) {
       {question.question_type === 'short_text' ? <RubricEditor value={correctAnswer} onChange={(value) => setCorrectAnswer({ ...correctAnswer, keywords: String(value.criteria || '').split(',').map((item) => item.trim()).filter(Boolean) })} /> : null}
       {question.question_type === 'long_text' ? <RubricEditor value={rubric} onChange={setRubric} /> : null}
       {question.question_type === 'audio_response' ? <AudioQuestionSettings settings={settings} setSettings={setSettings} rubric={rubric} setRubric={setRubric} /> : null}
-      {question.question_type === 'spreadsheet' ? <SpreadsheetQuestionSettings settings={settings} setSettings={setSettings} /> : null}
+      {question.question_type === 'spreadsheet' ? (
+        <SpreadsheetQuestionSettings
+          settings={settings}
+          setSettings={setSettings}
+          correctAnswer={correctAnswer}
+          setCorrectAnswer={setCorrectAnswer}
+          puntaje={question.puntaje}
+        />
+      ) : null}
       {question.question_type === 'kpi_numeric' ? <KpiQuestionSettings correctAnswer={correctAnswer} setCorrectAnswer={setCorrectAnswer} settings={settings} setSettings={setSettings} /> : null}
 
       {status.error ? <p className="alert error">{status.error}</p> : null}
