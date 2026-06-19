@@ -114,9 +114,9 @@ function fallbackSuggestion(result: any) {
   const scores = getModuleInsights(result);
   const actionFocus = scores.below80.length ? scores.below80.join(', ') : 'mantener estandar y seguimiento operativo';
   if (result.estado_resultado === 'pendiente_revision') {
-    return `Resultado: pendiente de revision manual para ${role}.\nBrechas: existen respuestas abiertas o de audio que aun deben calificarse antes de confirmar el resultado.\nSugerencias: revisar evidencia, criterios de rubrica y consistencia con el perfil requerido.\nPlan de accion: completar la revision manual y decidir continuidad con base en el puntaje consolidado.`;
+    return `El resultado aun requiere revision manual antes de emitir una conclusion definitiva para el rol ${role}. Esto significa que existen respuestas abiertas, de audio o evaluaciones por rubrica que deben ser verificadas para confirmar si el desempeno observado es suficiente frente a las exigencias del perfil.\n\nComo siguiente paso, se recomienda revisar la evidencia pendiente con criterios consistentes, contrastar las respuestas con las competencias criticas del rol y validar si las brechas detectadas afectan la continuidad del proceso. Una vez completada la revision, el equipo responsable podra decidir si corresponde avanzar, avanzar con condiciones o solicitar una nueva evaluacion.`;
   }
-  return `Resultado: ${decision} con promedio de ${average}% para ${role}; el mejor desempeno fue ${strongest.label} (${strongest.value}%) y el principal foco es ${weakest.label} (${weakest.value}%).\nBrechas: priorizar ${actionFocus} antes de asignar responsabilidades criticas.\nSugerencias: validar el impacto de esas brechas frente al rol postulado y complementar con entrevista tecnica o caso practico.\nPlan de accion: aplicar refuerzo dirigido, definir seguimiento inicial y reevaluar el modulo mas bajo.`;
+  return `El resultado sugiere ${decision} para el rol ${role}, con un promedio general de ${average}%. El mejor desempeno se observa en ${strongest.label}, con ${strongest.value}%, mientras que el principal punto de atencion esta en ${weakest.label}, donde obtuvo ${weakest.value}%. Este resultado debe interpretarse considerando el nivel de exigencia del puesto y el impacto operativo de las competencias evaluadas.\n\nLas brechas prioritarias se concentran en ${actionFocus}. Se recomienda validar estas oportunidades mediante entrevista tecnica, ejercicio practico o acompanamiento inicial, especialmente si el rol requiere autonomia desde el primer dia. Como plan de accion, conviene reforzar los modulos con menor puntaje, definir seguimiento durante las primeras semanas y considerar una reevaluacion focalizada antes de asignar responsabilidades criticas.`;
 }
 
 function getModuleInsights(result: any) {
@@ -206,14 +206,14 @@ Deno.serve(async (request) => {
             messages: [
               {
                 role: 'system',
-                content: 'Actua como evaluador senior de assessment BPO. Redacta en espanol un analisis profesional, concreto y accionable. Usa exactamente 4 bloques con estos titulos: Resultado, Brechas, Sugerencias, Plan de accion. Maximo 150 palabras en total. No saludes, no inventes datos, no uses lenguaje academico. Menciona literalmente el rol_postulado, el promedio y los modulos mas bajos.',
+                content: 'Actua como evaluador senior de assessment BPO. Redacta en espanol un analisis profesional, claro y accionable en 2 o 3 parrafos corridos. No uses listas, vinetas, numeracion, tablas, markdown ni encabezados. No saludes. No inventes datos. Menciona literalmente el rol_postulado, el promedio, las brechas principales, sugerencias de decision y un plan de accion. Extension objetivo: entre 170 y 230 palabras.',
               },
               {
                 role: 'user',
-                content: `Resultados: ${JSON.stringify(prompt)}. Si el resultado es "Apto con refuerzo", presentalo como "Apto con observacion". Incluye brechas principales, sugerencias para decidir continuidad y un plan de accion breve. Si hay modulos bajo 60, tratalos como brechas criticas. Si hay modulos entre 60 y 79, tratalos como oportunidades de refuerzo. Debe ayudar a decidir si conviene avanzar, avanzar con condiciones o pausar el proceso.`,
+                content: `Resultados: ${JSON.stringify(prompt)}. Si el resultado es "Apto con refuerzo", presentalo como "Apto con observacion". Si hay modulos bajo 60, tratalos como brechas criticas. Si hay modulos entre 60 y 79, tratalos como oportunidades de refuerzo. El texto debe sonar como una recomendacion de evaluador para decidir continuidad: explica que significa el resultado, que riesgos o brechas se observan, que validar antes de avanzar y que acciones concretas tomar.`,
               },
             ],
-            max_tokens: 280,
+            max_tokens: 420,
             temperature: 0.25,
           }),
         });
