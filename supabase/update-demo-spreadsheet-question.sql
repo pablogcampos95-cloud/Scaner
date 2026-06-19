@@ -1,8 +1,8 @@
 update public.questions
 set
-  titulo = 'Completa las formulas de sumar, restar, multiplicar y dividir.',
-  descripcion = 'Usa las columnas B y C para calcular cada resultado en la columna D.',
-  instrucciones = 'En D2 escribe =B2+C2, en D3 escribe =B3-C3, en D4 escribe =B4*C4 y en D5 escribe =B5/C5.',
+  titulo = 'Resuelve los ejercicios.',
+  descripcion = '',
+  instrucciones = '',
   correct_answer = jsonb_build_object(
     'expectedCells', jsonb_build_object(
       'D2', '138',
@@ -13,7 +13,11 @@ set
     'tolerance', 0.01
   ),
   settings = jsonb_build_object(
+    'rows', 8,
+    'columns', 4,
     'targetCell', 'D2',
+    'targetCells', jsonb_build_array('D2', 'D3', 'D4', 'D5'),
+    'editableCells', jsonb_build_array('D2', 'D3', 'D4', 'D5'),
     'expectedValue', '138',
     'expectedCells', jsonb_build_object(
       'D2', '138',
@@ -28,23 +32,18 @@ set
       'B1', 'Valor 1',
       'C1', 'Valor 2',
       'D1', 'Formula / resultado',
-      'E1', 'Guia',
       'A2', 'Sumar',
       'B2', '120',
       'C2', '18',
-      'E2', '=B2+C2',
       'A3', 'Restar',
       'B3', '120',
       'C3', '18',
-      'E3', '=B3-C3',
       'A4', 'Multiplicar',
       'B4', '12',
       'C4', '3',
-      'E4', '=B4*C4',
       'A5', 'Dividir',
       'B5', '120',
-      'C5', '18',
-      'E5', '=B5/C5'
+      'C5', '18'
     )
   ),
   updated_at = now()
