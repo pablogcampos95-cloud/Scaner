@@ -65,41 +65,46 @@ export async function saveDynamicEvaluationResponses({ assignment, evaluation, a
     };
 
     if (question.question_type === 'audio_response') {
-      responses.push(await saveAudioResponse({
+      const audioPath = await uploadAudioResponse({
         asignacionId: assignment.id,
         questionId: question.id,
-        evaluadoId: assignment.evaluado_id,
         audioBlob: answer?.blob,
-        question,
-      }));
+      });
+
+      responses.push({
+        ...base,
+        audio_path: audioPath,
+        audio_url: audioPath,
+      });
     } else if (question.question_type === 'spreadsheet') {
       const grading = gradeSpreadsheetAnswer(question.settings || {}, question.correct_answer || {}, answer, Number(question.puntaje || 0));
-      responses.push(await saveQuestionResponse({
+      responses.push({
         ...base,
         answer_json: { ...answer, grading },
         is_correct: grading.isCorrect,
         score_obtained: grading.scoreObtained,
         max_score: grading.maxScore,
         requires_review: grading.requiresReview,
-      }));
+      });
     } else if (['multiple_choice', 'kpi_numeric'].includes(question.question_type)) {
-      responses.push(await saveQuestionResponse({ ...base, answer_json: answer }));
+      responses.push({ ...base, answer_json: answer });
     } else {
-      responses.push(await saveQuestionResponse({ ...base, answer_text: typeof answer === 'string' ? answer : String(answer || '') }));
+      responses.push({ ...base, answer_text: typeof answer === 'string' ? answer : String(answer || '') });
     }
   }
 
   const summary = summarizeDynamicResult(evaluation.questions || [], responses);
-  await saveDynamicResult({ assignment, summary });
+  await saveDynamicResult({ assignment, summary, responses });
 
   if (!isSupabaseConfigured) {
+    responses.forEach((response) => insertLocal('evaluation_responses', response));
     updateLocal('asignaciones', assignment.id, { estado: 'completada', fecha_finalizacion: new Date().toISOString() });
   }
 
   return { responses, summary };
 }
 
-export async function saveDynamicResult({ assignment, summary }) {
+export async function saveDynamicResult({ assignment, summary, responses = [] }) {
   const payload = {
     asignacion_id: assignment.id,
     evaluado_id: assignment.evaluado_id,
@@ -116,6 +121,7 @@ export async function saveDynamicResult({ assignment, summary }) {
     score_obtained: summary.score_obtained,
     max_score: summary.max_score,
     pending_reviews: summary.pending_reviews,
+    responses,
   };
 
   if (isSupabaseConfigured) {
