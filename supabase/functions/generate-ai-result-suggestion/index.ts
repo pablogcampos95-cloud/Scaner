@@ -111,15 +111,33 @@ function getScoreSummary(result: any) {
 function fallbackSuggestion(result: any) {
   const role = getRoleLabel(result);
   const { average, strongest, weakest, decision } = getScoreSummary(result);
+  const scores = getModuleInsights(result);
+  const actionFocus = scores.below80.length ? scores.below80.join(', ') : 'mantener estandar y seguimiento operativo';
   if (result.estado_resultado === 'pendiente_revision') {
-    return `El resultado requiere revision manual antes de tomar una decision final. Para el rol ${role}, valida las respuestas pendientes y confirma si existe evidencia suficiente para continuar.`;
+    return `Resultado: pendiente de revision manual para ${role}.\nBrechas: existen respuestas abiertas o de audio que aun deben calificarse antes de confirmar el resultado.\nSugerencias: revisar evidencia, criterios de rubrica y consistencia con el perfil requerido.\nPlan de accion: completar la revision manual y decidir continuidad con base en el puntaje consolidado.`;
   }
-  return `El resultado sugiere ${decision} con promedio de ${average}%. Para el rol ${role}, considera especialmente el modulo ${weakest.label}, donde obtuvo ${weakest.value}%, antes de continuar.`;
+  return `Resultado: ${decision} con promedio de ${average}% para ${role}; el mejor desempeno fue ${strongest.label} (${strongest.value}%) y el principal foco es ${weakest.label} (${weakest.value}%).\nBrechas: priorizar ${actionFocus} antes de asignar responsabilidades criticas.\nSugerencias: validar el impacto de esas brechas frente al rol postulado y complementar con entrevista tecnica o caso practico.\nPlan de accion: aplicar refuerzo dirigido, definir seguimiento inicial y reevaluar el modulo mas bajo.`;
+}
+
+function getModuleInsights(result: any) {
+  const scores: ScoreItem[] = [
+    { key: 'pc', label: 'PC', value: Number(result.puntaje_pc || 0) },
+    { key: 'excel', label: 'Excel', value: Number(result.puntaje_excel || 0) },
+    { key: 'etica', label: 'Etica comercial', value: Number(result.puntaje_etica || 0) },
+    { key: 'kpis', label: 'KPIs', value: Number(result.puntaje_kpis || 0) },
+  ];
+
+  return {
+    below60: scores.filter((score) => score.value < 60).map((score) => `${score.label} ${score.value}%`),
+    below80: scores.filter((score) => score.value < 80).map((score) => `${score.label} ${score.value}%`),
+    above80: scores.filter((score) => score.value >= 80).map((score) => `${score.label} ${score.value}%`),
+  };
 }
 
 function compactKeywords(result: any) {
   const role = getRoleLabel(result);
   const { average, strongest, weakest, decision } = getScoreSummary(result);
+  const moduleInsights = getModuleInsights(result);
 
   return {
     rol_postulado: role,
@@ -132,6 +150,9 @@ function compactKeywords(result: any) {
     excel: Number(result.puntaje_excel || 0),
     etica: Number(result.puntaje_etica || 0),
     kpis: Number(result.puntaje_kpis || 0),
+    modulos_bajo_60: moduleInsights.below60,
+    modulos_bajo_80: moduleInsights.below80,
+    modulos_fuertes: moduleInsights.above80,
     decision_sugerida: decision,
     estado: result.estado_resultado || 'finalizado',
   };
@@ -185,15 +206,15 @@ Deno.serve(async (request) => {
             messages: [
               {
                 role: 'system',
-                content: 'Actua como evaluador senior de assessment BPO. Redacta una recomendacion profesional en espanol, maximo 2 frases y 65 palabras. No uses vinetas. No saludes. No digas "fortaleza" ni "debilidad". Debes mencionar literalmente el rol_postulado y el modulo con puntaje_mas_bajo.',
+                content: 'Actua como evaluador senior de assessment BPO. Redacta en espanol un analisis profesional, concreto y accionable. Usa exactamente 4 bloques con estos titulos: Resultado, Brechas, Sugerencias, Plan de accion. Maximo 150 palabras en total. No saludes, no inventes datos, no uses lenguaje academico. Menciona literalmente el rol_postulado, el promedio y los modulos mas bajos.',
               },
               {
                 role: 'user',
-                content: `Resultados: ${JSON.stringify(prompt)}. Si el resultado es "Apto con refuerzo", mencionalo como "Apto con observacion". Explica que hay puntos importantes por mejorar y que, por el rol postulado, el modulo mas bajo debe considerarse antes de continuar el proceso.`,
+                content: `Resultados: ${JSON.stringify(prompt)}. Si el resultado es "Apto con refuerzo", presentalo como "Apto con observacion". Incluye brechas principales, sugerencias para decidir continuidad y un plan de accion breve. Si hay modulos bajo 60, tratalos como brechas criticas. Si hay modulos entre 60 y 79, tratalos como oportunidades de refuerzo. Debe ayudar a decidir si conviene avanzar, avanzar con condiciones o pausar el proceso.`,
               },
             ],
-            max_tokens: 120,
-            temperature: 0.3,
+            max_tokens: 280,
+            temperature: 0.25,
           }),
         });
 
