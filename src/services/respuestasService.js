@@ -47,7 +47,7 @@ export async function saveSpreadsheetResponse({ asignacionId, questionId, evalua
   });
 }
 
-export async function saveDynamicEvaluationResponses({ assignment, evaluation, answers }) {
+export async function saveDynamicEvaluationResponses({ token, assignment, evaluation, answers }) {
   const responses = [];
 
   for (const question of evaluation.questions || []) {
@@ -94,7 +94,7 @@ export async function saveDynamicEvaluationResponses({ assignment, evaluation, a
   }
 
   const summary = summarizeDynamicResult(evaluation.questions || [], responses);
-  await saveDynamicResult({ assignment, summary, responses });
+  await saveDynamicResult({ token, assignment, summary, responses });
 
   if (!isSupabaseConfigured) {
     responses.forEach((response) => insertLocal('evaluation_responses', response));
@@ -104,7 +104,7 @@ export async function saveDynamicEvaluationResponses({ assignment, evaluation, a
   return { responses, summary };
 }
 
-export async function saveDynamicResult({ assignment, summary, responses = [] }) {
+export async function saveDynamicResult({ token, assignment, summary, responses = [] }) {
   const payload = {
     asignacion_id: assignment.id,
     evaluado_id: assignment.evaluado_id,
@@ -125,8 +125,15 @@ export async function saveDynamicResult({ assignment, summary, responses = [] })
   };
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.rpc('complete_dynamic_assignment_public', { p_payload: payload });
+    const { data, error } = await supabase.functions.invoke('submit-evaluation', {
+      body: {
+        token: token || assignment.token_unico,
+        result: payload,
+        responses,
+      },
+    });
     if (error) throw new Error(error.message);
+    if (data && data.success === false) throw new Error(data.error || 'No se pudo guardar la evaluación.');
     return data;
   }
 

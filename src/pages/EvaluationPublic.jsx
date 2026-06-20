@@ -101,6 +101,7 @@ export default function EvaluationPublic() {
     try {
       if (hasDynamicQuestions) {
         await saveDynamicEvaluationResponses({
+          token,
           assignment: state.assignment,
           evaluation: state.scoringEvaluation || state.evaluation,
           answers,
