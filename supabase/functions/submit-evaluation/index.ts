@@ -22,6 +22,9 @@ type ResponsePayload = {
   answer_json?: unknown;
   audio_path?: string | null;
   audio_url?: string | null;
+  audio_base64?: string | null;
+  audio_content_type?: string | null;
+  audio_duration?: number | null;
   is_correct?: boolean | null;
   score_obtained?: number;
   max_score?: number;
@@ -77,6 +80,44 @@ async function supabaseRequest(path: string, options: RequestInit = {}) {
   return data;
 }
 
+function base64ToBytes(value: string) {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
+}
+
+async function uploadAudioResponse(assignmentId: string, questionId: string, base64Audio: string, contentType = 'audio/webm') {
+  if (!base64Audio) return null;
+
+  const { supabaseUrl, serviceKey } = getSupabaseConfig();
+  const safeContentType = contentType || 'audio/webm';
+  const extension = safeContentType.includes('ogg') ? 'ogg' : 'webm';
+  const path = `${assignmentId}/${questionId}/${Date.now()}.${extension}`;
+  const bytes = base64ToBytes(base64Audio);
+
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/audio-responses/${path}`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': safeContentType,
+      'x-upsert': 'true',
+    },
+    body: bytes,
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    const data = text ? JSON.parse(text) : null;
+    throw new HttpError(data?.message || data?.error || text || 'No se pudo guardar el audio.', response.status);
+  }
+
+  return path;
+}
+
 function toNumber(value: unknown, fallback = 0) {
   const numberValue = Number(value ?? fallback);
   return Number.isFinite(numberValue) ? numberValue : fallback;
@@ -102,12 +143,15 @@ function normalizeResult(result: Record<string, unknown> | undefined, assignment
   };
 }
 
-function normalizeResponse(response: ResponsePayload, assignment: any, allowedQuestionIds: Set<string>) {
+async function normalizeResponse(response: ResponsePayload, assignment: any, allowedQuestionIds: Set<string>) {
   if (!response?.question_id || !allowedQuestionIds.has(response.question_id)) {
     throw new HttpError('Una respuesta no corresponde a la evaluación asignada.', 400);
   }
 
   const answerJson = response.answer_json && typeof response.answer_json === 'object' ? response.answer_json : null;
+  const uploadedAudioPath = response.audio_base64
+    ? await uploadAudioResponse(assignment.id, response.question_id, response.audio_base64, response.audio_content_type || 'audio/webm')
+    : null;
 
   return {
     asignacion_id: assignment.id,
@@ -116,8 +160,8 @@ function normalizeResponse(response: ResponsePayload, assignment: any, allowedQu
     answer_type: response.answer_type || null,
     answer_text: response.answer_text ?? null,
     answer_json: answerJson,
-    audio_path: response.audio_path ?? null,
-    audio_url: response.audio_url ?? null,
+    audio_path: uploadedAudioPath || response.audio_path || null,
+    audio_url: uploadedAudioPath || response.audio_url || null,
     is_correct: typeof response.is_correct === 'boolean' ? response.is_correct : null,
     score_obtained: toNumber(response.score_obtained),
     max_score: toNumber(response.max_score),
@@ -168,7 +212,10 @@ async function submitEvaluation(payload: SubmitPayload) {
 
   const questionIds = await getEvaluationQuestionIds(assignment.evaluacion_id);
   const responses = Array.isArray(payload.responses) ? payload.responses : [];
-  const normalizedResponses = responses.map((response) => normalizeResponse(response, assignment, questionIds));
+  const normalizedResponses = [];
+  for (const response of responses) {
+    normalizedResponses.push(await normalizeResponse(response, assignment, questionIds));
+  }
   const normalizedResult = normalizeResult(payload.result, assignment);
 
   await supabaseRequest(`/rest/v1/evaluation_responses?asignacion_id=eq.${encodeURIComponent(assignment.id)}`, {

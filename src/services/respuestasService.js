@@ -1,7 +1,7 @@
 import { calculateQuestionScore, summarizeDynamicResult } from '../utils/scoreCalculator.js';
 import { gradeSpreadsheetAnswer } from '../utils/spreadsheetGrader.js';
 import { insertLocal, listLocal, updateLocal } from './localStore.js';
-import { isSupabaseConfigured, supabase } from './supabaseClient.js';
+import { isSupabaseConfigured, supabase, supabaseAnonKey, supabaseUrl } from './supabaseClient.js';
 import { uploadAudioResponse } from './storageService.js';
 
 export async function saveQuestionResponse(payload) {
@@ -29,6 +29,42 @@ export async function saveAudioResponse({ asignacionId, questionId, evaluadoId, 
     max_score: Number(question?.puntaje || 0),
     requires_review: true,
   });
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    if (!blob) {
+      resolve('');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = String(reader.result || '');
+      resolve(result.includes(',') ? result.split(',').pop() : result);
+    };
+    reader.onerror = () => reject(new Error('No se pudo preparar el audio para guardar.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function invokeSubmitEvaluation(body) {
+  const response = await fetch(`${supabaseUrl}/functions/v1/submit-evaluation`, {
+    method: 'POST',
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok || data?.success === false) {
+    throw new Error(data?.error || 'No se pudo guardar la evaluación.');
+  }
+  return data;
 }
 
 export async function saveSpreadsheetResponse({ asignacionId, questionId, evaluadoId, answerJson, question }) {
@@ -65,17 +101,26 @@ export async function saveDynamicEvaluationResponses({ token, assignment, evalua
     };
 
     if (question.question_type === 'audio_response') {
-      const audioPath = await uploadAudioResponse({
-        asignacionId: assignment.id,
-        questionId: question.id,
-        audioBlob: answer?.blob,
-      });
+      if (isSupabaseConfigured) {
+        responses.push({
+          ...base,
+          audio_base64: await blobToBase64(answer?.blob),
+          audio_content_type: answer?.blob?.type || 'audio/webm',
+          audio_duration: answer?.duration || 0,
+        });
+      } else {
+        const audioPath = await uploadAudioResponse({
+          asignacionId: assignment.id,
+          questionId: question.id,
+          audioBlob: answer?.blob,
+        });
 
-      responses.push({
-        ...base,
-        audio_path: audioPath,
-        audio_url: audioPath,
-      });
+        responses.push({
+          ...base,
+          audio_path: audioPath,
+          audio_url: audioPath,
+        });
+      }
     } else if (question.question_type === 'spreadsheet') {
       const grading = gradeSpreadsheetAnswer(question.settings || {}, question.correct_answer || {}, answer, Number(question.puntaje || 0));
       responses.push({
@@ -125,16 +170,11 @@ export async function saveDynamicResult({ token, assignment, summary, responses 
   };
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.functions.invoke('submit-evaluation', {
-      body: {
-        token: token || assignment.token_unico,
-        result: payload,
-        responses,
-      },
+    return invokeSubmitEvaluation({
+      token: token || assignment.token_unico,
+      result: payload,
+      responses,
     });
-    if (error) throw new Error(error.message);
-    if (data && data.success === false) throw new Error(data.error || 'No se pudo guardar la evaluación.');
-    return data;
   }
 
   return insertLocal('resultados', payload);
