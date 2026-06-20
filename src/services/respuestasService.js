@@ -198,13 +198,40 @@ export async function getResponsesByAsignacion(asignacionId) {
       .eq('asignacion_id', asignacionId)
       .order('created_at', { ascending: true });
     if (error) throw new Error(error.message);
-    return data;
+
+    const questionIds = [...new Set((data || []).map((row) => row.question_id).filter(Boolean))];
+    const { data: options, error: optionsError } = questionIds.length
+      ? await supabase
+        .from('question_options')
+        .select('*')
+        .in('question_id', questionIds)
+        .order('orden', { ascending: true })
+      : { data: [], error: null };
+    if (optionsError) throw new Error(optionsError.message);
+
+    return (data || []).map((row) => ({
+      ...row,
+      questions: {
+        ...(row.questions || {}),
+        options: (options || []).filter((option) => option.question_id === row.question_id),
+      },
+    }));
   }
 
   const questions = listLocal('questions');
+  const options = listLocal('question_options');
   return listLocal('evaluation_responses')
     .filter((row) => row.asignacion_id === asignacionId)
-    .map((row) => ({ ...row, questions: questions.find((question) => question.id === row.question_id) }));
+    .map((row) => {
+      const question = questions.find((item) => item.id === row.question_id);
+      return {
+        ...row,
+        questions: {
+          ...(question || {}),
+          options: options.filter((option) => option.question_id === row.question_id && !option.deleted).sort((a, b) => a.orden - b.orden),
+        },
+      };
+    });
 }
 
 export async function getPendingManualReviews(profile) {

@@ -536,6 +536,15 @@
   overflow-wrap: anywhere;
 }
 
+.answer-choice-list {
+  color: #101828;
+  display: grid;
+  gap: 6px;
+  list-style: disc;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .review-form {
   align-items: end;
   display: grid;

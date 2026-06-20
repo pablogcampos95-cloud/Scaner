@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
+import ResponseAnswerView from '../components/ResponseAnswerView.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
-import SpreadsheetResultView from '../components/spreadsheet/SpreadsheetResultView.jsx';
 import { getResponsesByAsignacion, saveManualReview } from '../services/respuestasService.js';
 import { getAudioSignedUrl } from '../services/storageService.js';
 
@@ -70,7 +70,7 @@ export default function ManualReview() {
               <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
             </div>
 
-            <ResponseContent response={response} />
+            <ResponseAnswerView response={response} />
 
             <div className="review-form">
               <label>
@@ -110,63 +110,5 @@ export default function ManualReview() {
 
       {!state.loading && state.responses.length === 0 ? <p className="alert success">No hay respuestas registradas para esta asignación.</p> : null}
     </section>
-  );
-}
-
-function ResponseContent({ response }) {
-  if (response.answer_type === 'spreadsheet' && response.answer_json) {
-    return <SpreadsheetResultView response={response} />;
-  }
-
-  if (response.playableAudioUrl) {
-    return (
-      <div className="review-answer-block">
-        <span>Respuesta de audio</span>
-        <audio controls src={response.playableAudioUrl} />
-      </div>
-    );
-  }
-
-  if (response.answer_text) {
-    return (
-      <div className="review-answer-block">
-        <span>Respuesta enviada</span>
-        <p>{response.answer_text}</p>
-      </div>
-    );
-  }
-
-  if (response.answer_json) {
-    return <JsonAnswerView value={response.answer_json} type={response.answer_type} />;
-  }
-
-  return <p className="demo-note">No se registró contenido para esta respuesta.</p>;
-}
-
-function JsonAnswerView({ value, type }) {
-  if (type === 'multiple_choice' && Array.isArray(value)) {
-    return (
-      <div className="review-answer-block">
-        <span>Opciones seleccionadas</span>
-        <p>{value.join(', ')}</p>
-      </div>
-    );
-  }
-
-  if (type === 'kpi_numeric') {
-    const answer = typeof value === 'object' ? value.value ?? value.answer ?? value.result : value;
-    return (
-      <div className="review-answer-block">
-        <span>Respuesta numérica</span>
-        <p>{String(answer ?? '-')}</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="review-answer-block">
-      <span>Respuesta registrada</span>
-      <p>{typeof value === 'string' ? value : JSON.stringify(value)}</p>
-    </div>
   );
 }

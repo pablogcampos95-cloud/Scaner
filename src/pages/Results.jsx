@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useOutletContext, useParams } from 'react-router-dom';
 import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
+import ResponseAnswerView from '../components/ResponseAnswerView.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
-import SpreadsheetResultView from '../components/spreadsheet/SpreadsheetResultView.jsx';
 import { generateResultSuggestion } from '../services/aiService.js';
 import { getResponsesByAsignacion } from '../services/respuestasService.js';
 import { getResultadoById, listResultados } from '../services/resultadosService.js';
@@ -156,10 +156,7 @@ export default function Results() {
                     <strong>{response.questions?.titulo || 'Pregunta'}</strong>
                     <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
                   </div>
-                  {response.answer_text ? <p>{response.answer_text}</p> : null}
-                  {response.playableAudioUrl ? <audio controls src={response.playableAudioUrl} /> : null}
-                  {response.answer_json && response.answer_type === 'spreadsheet' ? <SpreadsheetResultView response={response} /> : null}
-                  {response.answer_json && response.answer_type !== 'spreadsheet' ? <pre>{JSON.stringify(response.answer_json, null, 2)}</pre> : null}
+                  <ResponseAnswerView response={response} />
                   <small>Puntaje: {response.score_obtained} / {response.max_score}</small>
                 </article>
               ))}
