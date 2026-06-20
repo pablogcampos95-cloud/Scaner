@@ -227,14 +227,13 @@ export async function saveManualReview({ responseId, reviewerId, score, comment,
   };
 
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('manual_reviews').insert(reviewPayload).select().single();
+    const { data, error } = await supabase.rpc('review_evaluation_response', {
+      p_response_id: responseId,
+      p_score: Number(score || 0),
+      p_comment: comment || '',
+      p_rubric_result: rubricResult || {},
+    });
     if (error) throw new Error(error.message);
-
-    const { error: updateError } = await supabase
-      .from('evaluation_responses')
-      .update({ score_obtained: Number(score || 0), requires_review: false, reviewed_by: reviewerId, review_comment: comment || '' })
-      .eq('id', responseId);
-    if (updateError) throw new Error(updateError.message);
     return data;
   }
 

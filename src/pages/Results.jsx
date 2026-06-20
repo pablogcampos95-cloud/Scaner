@@ -136,9 +136,9 @@ export default function Results() {
               {state.aiLoading ? 'Generando...' : result.ai_suggestion ? 'Regenerar sugerencia IA' : 'Generar sugerencia IA'}
             </button>
           </div>
-          {state.responses.some((response) => response.requires_review) ? (
+          {state.responses.length ? (
             <Link className="primary-button compact" to={`/resultados/${result.asignacion_id}/revision`}>
-              Revisar respuestas pendientes
+              Revisar / ajustar respuestas
             </Link>
           ) : null}
           <Link className="secondary-button compact" to={profile.role === 'admin' ? '/admin' : '/supervisor'}>

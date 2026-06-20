@@ -1,61 +1,172 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
+import ResultBadge from '../components/ResultBadge.jsx';
+import SpreadsheetResultView from '../components/spreadsheet/SpreadsheetResultView.jsx';
 import { getResponsesByAsignacion, saveManualReview } from '../services/respuestasService.js';
+import { getAudioSignedUrl } from '../services/storageService.js';
 
 export default function ManualReview() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ responses: [], loading: true, error: '', scores: {}, comments: {} });
+  const [state, setState] = useState({ responses: [], loading: true, error: '', message: '', scores: {}, comments: {}, savingId: '' });
 
   const load = () => {
     getResponsesByAsignacion(id)
-      .then((responses) => setState((prev) => ({ ...prev, responses: responses.filter((response) => response.requires_review), loading: false, error: '' })))
+      .then(async (responses) => {
+        const decorated = await Promise.all(responses.map(async (response) => ({
+          ...response,
+          playableAudioUrl: response.audio_path ? await getAudioSignedUrl(response.audio_path) : response.audio_url,
+        })));
+        const scores = Object.fromEntries(decorated.map((response) => [response.id, response.score_obtained ?? 0]));
+        const comments = Object.fromEntries(decorated.map((response) => [response.id, response.review_comment || '']));
+        setState((prev) => ({ ...prev, responses: decorated, scores, comments, loading: false, error: '' }));
+      })
       .catch((error) => setState((prev) => ({ ...prev, loading: false, error: error.message })));
   };
 
   useEffect(load, [id]);
 
-  const save = async (responseId) => {
-    await saveManualReview({
-      responseId,
-      reviewerId: profile.id,
-      score: state.scores[responseId] || 0,
-      comment: state.comments[responseId] || '',
-      rubricResult: {},
-    });
-    load();
+  const save = async (response) => {
+    setState((prev) => ({ ...prev, savingId: response.id, error: '', message: '' }));
+    try {
+      await saveManualReview({
+        responseId: response.id,
+        reviewerId: profile.id,
+        score: state.scores[response.id] ?? 0,
+        comment: state.comments[response.id] || '',
+        rubricResult: { source: 'manual_review' },
+      });
+      setState((prev) => ({ ...prev, savingId: '', message: 'Revisión guardada y resultado recalculado.' }));
+      load();
+    } catch (error) {
+      setState((prev) => ({ ...prev, savingId: '', error: error.message }));
+    }
   };
 
   return (
     <section className="page-stack">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">Revisión manual</span>
-          <h1>Respuestas pendientes</h1>
-          <p>Califica respuestas de texto largo, audio o rúbrica.</p>
+          <span className="eyebrow">Validación de respuestas</span>
+          <h1>Revisar evaluación</h1>
+          <p>Valida, ajusta puntajes y registra comentarios para cada respuesta del evaluado.</p>
         </div>
+        <Link className="secondary-button compact" to={`/resultados/${id}`}>
+          Volver al informe
+        </Link>
       </div>
+
       {state.error ? <p className="alert error">{state.error}</p> : null}
-      {state.responses.map((response) => (
-        <article className="form-card" key={response.id}>
-          <h2>{response.questions?.titulo || 'Pregunta'}</h2>
-          {response.answer_text ? <p>{response.answer_text}</p> : null}
-          {response.audio_url || response.audio_path ? <audio controls src={response.audio_url || response.audio_path} /> : null}
-          {response.answer_json ? <pre>{JSON.stringify(response.answer_json, null, 2)}</pre> : null}
-          <div className="form-grid">
-            <label>
-              Puntaje
-              <input type="number" value={state.scores[response.id] || ''} onChange={(event) => setState({ ...state, scores: { ...state.scores, [response.id]: event.target.value } })} />
-            </label>
-            <label>
-              Comentario
-              <input value={state.comments[response.id] || ''} onChange={(event) => setState({ ...state, comments: { ...state.comments, [response.id]: event.target.value } })} />
-            </label>
-          </div>
-          <button className="primary-button compact" type="button" onClick={() => save(response.id)}>Guardar revisión</button>
-        </article>
-      ))}
-      {!state.loading && state.responses.length === 0 ? <p className="alert success">No hay respuestas pendientes de revisión para esta asignación.</p> : null}
+      {state.message ? <p className="alert success">{state.message}</p> : null}
+
+      <div className="responses-list review-list">
+        {state.responses.map((response, index) => (
+          <article className="response-card review-card" key={response.id}>
+            <div className="review-card-header">
+              <div>
+                <span className="eyebrow">Pregunta {index + 1}</span>
+                <h2>{response.questions?.titulo || 'Pregunta'}</h2>
+              </div>
+              <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
+            </div>
+
+            <ResponseContent response={response} />
+
+            <div className="review-form">
+              <label>
+                Puntaje obtenido
+                <input
+                  type="number"
+                  min="0"
+                  max={Number(response.max_score || 0)}
+                  step="0.1"
+                  value={state.scores[response.id] ?? ''}
+                  onChange={(event) => setState((prev) => ({
+                    ...prev,
+                    scores: { ...prev.scores, [response.id]: event.target.value },
+                  }))}
+                />
+                <small>Máximo: {response.max_score ?? 0}</small>
+              </label>
+              <label>
+                Comentario de validación
+                <textarea
+                  rows="3"
+                  value={state.comments[response.id] || ''}
+                  onChange={(event) => setState((prev) => ({
+                    ...prev,
+                    comments: { ...prev.comments, [response.id]: event.target.value },
+                  }))}
+                  placeholder="Agrega una observación breve para sustentar el ajuste."
+                />
+              </label>
+              <button className="primary-button compact" type="button" onClick={() => save(response)} disabled={state.savingId === response.id}>
+                {state.savingId === response.id ? 'Guardando...' : 'Guardar validación'}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {!state.loading && state.responses.length === 0 ? <p className="alert success">No hay respuestas registradas para esta asignación.</p> : null}
     </section>
+  );
+}
+
+function ResponseContent({ response }) {
+  if (response.answer_type === 'spreadsheet' && response.answer_json) {
+    return <SpreadsheetResultView response={response} />;
+  }
+
+  if (response.playableAudioUrl) {
+    return (
+      <div className="review-answer-block">
+        <span>Respuesta de audio</span>
+        <audio controls src={response.playableAudioUrl} />
+      </div>
+    );
+  }
+
+  if (response.answer_text) {
+    return (
+      <div className="review-answer-block">
+        <span>Respuesta enviada</span>
+        <p>{response.answer_text}</p>
+      </div>
+    );
+  }
+
+  if (response.answer_json) {
+    return <JsonAnswerView value={response.answer_json} type={response.answer_type} />;
+  }
+
+  return <p className="demo-note">No se registró contenido para esta respuesta.</p>;
+}
+
+function JsonAnswerView({ value, type }) {
+  if (type === 'multiple_choice' && Array.isArray(value)) {
+    return (
+      <div className="review-answer-block">
+        <span>Opciones seleccionadas</span>
+        <p>{value.join(', ')}</p>
+      </div>
+    );
+  }
+
+  if (type === 'kpi_numeric') {
+    const answer = typeof value === 'object' ? value.value ?? value.answer ?? value.result : value;
+    return (
+      <div className="review-answer-block">
+        <span>Respuesta numérica</span>
+        <p>{String(answer ?? '-')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="review-answer-block">
+      <span>Respuesta registrada</span>
+      <p>{typeof value === 'string' ? value : JSON.stringify(value)}</p>
+    </div>
   );
 }
