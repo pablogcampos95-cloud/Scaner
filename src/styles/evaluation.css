@@ -672,3 +672,483 @@
     flex-direction: column;
   }
 }
+
+/* Public evaluation: corporate assessment layout */
+.evaluation-page {
+  --eval-bg: #f6f8fc;
+  --eval-surface: #ffffff;
+  --eval-soft: #f9fafb;
+  --eval-muted: #667085;
+  --eval-text: #101828;
+  --eval-border: #e5e7eb;
+  --eval-primary: #1877ff;
+  --eval-cyan: #16bfe8;
+  --eval-gradient: linear-gradient(135deg, #16bfe8 0%, #1877ff 58%, #0f5ed7 100%);
+  background:
+    radial-gradient(circle at top left, rgba(22, 191, 232, 0.16), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, var(--eval-bg) 54%, #eef4fb 100%);
+  color: var(--eval-text);
+  padding: 32px;
+}
+
+.evaluation-page .evaluation-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  max-width: 1180px;
+  padding: 0;
+}
+
+.evaluation-page .evaluation-header {
+  align-items: stretch;
+  background: var(--eval-gradient);
+  border: 1px solid rgba(24, 119, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 94, 215, 0.18);
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  overflow: hidden;
+  padding: 28px;
+  position: relative;
+}
+
+.evaluation-page .evaluation-header::after {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.26), transparent 56%),
+    linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.16));
+  content: '';
+  height: 220px;
+  opacity: 0.52;
+  position: absolute;
+  right: -72px;
+  top: -88px;
+  transform: rotate(12deg);
+  width: 340px;
+}
+
+.evaluation-page .evaluation-brand-block,
+.evaluation-page .identity-box {
+  position: relative;
+  z-index: 1;
+}
+
+.evaluation-page .evaluation-brand-block {
+  display: grid;
+  gap: 8px;
+  max-width: 760px;
+}
+
+.evaluation-page .evaluation-brand-block .logo {
+  background: rgba(7, 17, 31, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 18px;
+  height: 72px;
+  padding: 8px;
+  width: 72px;
+}
+
+.evaluation-page .evaluation-header .eyebrow {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-top: 8px;
+}
+
+.evaluation-page .evaluation-header h1,
+.evaluation-page .evaluation-header h2,
+.evaluation-page .evaluation-header p {
+  color: #ffffff;
+}
+
+.evaluation-page .evaluation-header h1 {
+  font-size: clamp(36px, 6vw, 62px);
+  letter-spacing: 0;
+  line-height: 0.98;
+  margin: 0;
+}
+
+.evaluation-page .evaluation-header h2 {
+  font-size: clamp(20px, 2.8vw, 28px);
+  font-weight: 700;
+  line-height: 1.18;
+  margin: 0;
+}
+
+.evaluation-page .evaluation-header p {
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 4px 0 0;
+  max-width: 660px;
+  opacity: 0.88;
+}
+
+.evaluation-page .identity-box {
+  align-self: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: 18px;
+  box-shadow: 0 18px 36px rgba(16, 24, 40, 0.12);
+  color: var(--eval-text);
+  gap: 8px;
+  padding: 20px;
+}
+
+.evaluation-page .identity-box strong {
+  color: var(--eval-text);
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.evaluation-page .identity-box span {
+  color: var(--eval-muted);
+  font-size: 14px;
+}
+
+.evaluation-page .start-block,
+.evaluation-page .questions-flow,
+.evaluation-page .completion-panel {
+  background: var(--eval-surface);
+  border: 1px solid var(--eval-border);
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+  margin-top: 22px;
+  padding: 24px;
+}
+
+.evaluation-page .start-block {
+  border-top: 1px solid var(--eval-border);
+}
+
+.evaluation-page .module-pills span {
+  background: #eaf3ff;
+  border: 1px solid #cde4ff;
+  color: #0f5ed7;
+  font-size: 13px;
+}
+
+.evaluation-page .confidential-note {
+  background: #f8fafc;
+  border: 1px solid var(--eval-border);
+  color: #475467;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.evaluation-page .progress-card,
+.evaluation-page .question-card {
+  background: var(--eval-surface);
+  border: 1px solid var(--eval-border);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+}
+
+.evaluation-page .progress-card {
+  padding: 18px;
+}
+
+.evaluation-page .progress-card span,
+.evaluation-page .progress-card small {
+  color: var(--eval-muted);
+}
+
+.evaluation-page .progress-card strong {
+  color: var(--eval-text);
+}
+
+.evaluation-page .progress-track {
+  background: #e5e7eb;
+  height: 9px;
+}
+
+.evaluation-page .progress-track span {
+  background: var(--eval-gradient);
+}
+
+.evaluation-page .module-heading span {
+  color: var(--eval-primary);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.evaluation-page .question-module h2 {
+  color: var(--eval-text);
+  font-size: 24px;
+}
+
+.evaluation-page .question-card {
+  border-radius: 18px;
+  gap: 14px;
+  padding: 22px;
+}
+
+.evaluation-page .question-title {
+  color: var(--eval-text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.evaluation-page .question-description {
+  color: #475467;
+  line-height: 1.55;
+  padding: 0;
+}
+
+.evaluation-page .question-instructions,
+.evaluation-page .spreadsheet-help {
+  background: #e6f9ff;
+  border: 1px solid #b9e9f5;
+  color: #075985;
+  font-weight: 600;
+}
+
+.evaluation-page .option-row {
+  background: var(--eval-soft);
+  border: 1px solid var(--eval-border);
+  color: var(--eval-text);
+  font-weight: 500;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.evaluation-page .option-row:hover {
+  background: #f1f7ff;
+  border-color: #9ed9ff;
+  box-shadow: 0 8px 20px rgba(24, 119, 255, 0.08);
+}
+
+.evaluation-page .question-card input:not(.spreadsheet-cell):not([type="radio"]):not([type="checkbox"]),
+.evaluation-page .question-card textarea {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  color: var(--eval-text);
+  font: inherit;
+  min-height: 44px;
+}
+
+.evaluation-page .question-card input:not(.spreadsheet-cell):not([type="radio"]):not([type="checkbox"]):focus,
+.evaluation-page .question-card textarea:focus {
+  border-color: var(--eval-primary);
+  box-shadow: 0 0 0 3px rgba(24, 119, 255, 0.12);
+  outline: none;
+}
+
+.evaluation-page .audio-recorder {
+  background: #f8fafc;
+  border: 1px solid var(--eval-border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.evaluation-page .spreadsheet-shell {
+  border-color: var(--eval-border);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+}
+
+.evaluation-page .evaluation-actions {
+  border-top: 1px solid var(--eval-border);
+  padding-top: 18px;
+}
+
+.evaluation-page .primary-button {
+  background: var(--eval-gradient);
+  border: 0;
+  box-shadow: 0 12px 22px rgba(24, 119, 255, 0.18);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.evaluation-page .primary-button:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+.evaluation-page .secondary-button {
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  color: #344054;
+}
+
+.evaluation-page .alert.error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+@media (max-width: 900px) {
+  .evaluation-page {
+    padding: 18px;
+  }
+
+  .evaluation-page .evaluation-header {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .evaluation-page .identity-box {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .evaluation-page {
+    padding: 12px;
+  }
+
+  .evaluation-page .evaluation-header,
+  .evaluation-page .start-block,
+  .evaluation-page .questions-flow {
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .evaluation-page .evaluation-brand-block .logo {
+    height: 62px;
+    width: 62px;
+  }
+
+  .evaluation-page .evaluation-header h1 {
+    font-size: 38px;
+  }
+
+  .evaluation-page .evaluation-header h2 {
+    font-size: 20px;
+  }
+
+  .evaluation-page .question-card {
+    padding: 18px;
+  }
+
+  .evaluation-page .evaluation-actions {
+    flex-direction: column;
+  }
+}
+
+/* Definitive public candidate interface */
+.public-evaluation-page {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(22, 191, 232, 0.14), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f6f8fc 56%, #eef4fb 100%) !important;
+  color: #101828 !important;
+  min-height: 100vh;
+}
+
+.public-evaluation-page .public-evaluation-panel {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  max-width: 1180px;
+  padding: 0 !important;
+}
+
+.public-evaluation-page .public-evaluation-header {
+  background: linear-gradient(135deg, #16bfe8 0%, #1877ff 56%, #0f5ed7 100%) !important;
+  border: 1px solid rgba(24, 119, 255, 0.18) !important;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 94, 215, 0.18);
+  padding: 28px;
+}
+
+.public-evaluation-page .evaluation-brand-block .logo {
+  background: rgba(7, 17, 31, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+}
+
+.public-evaluation-page .public-evaluation-header h1,
+.public-evaluation-page .public-evaluation-header h2,
+.public-evaluation-page .public-evaluation-header p,
+.public-evaluation-page .public-evaluation-header .eyebrow {
+  color: #ffffff !important;
+}
+
+.public-evaluation-page .public-evaluation-header h1 {
+  font-size: clamp(38px, 6vw, 64px);
+}
+
+.public-evaluation-page .identity-box {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(255, 255, 255, 0.58) !important;
+  box-shadow: 0 18px 36px rgba(16, 24, 40, 0.12);
+  color: #101828 !important;
+}
+
+.public-evaluation-page .identity-box strong {
+  color: #101828 !important;
+}
+
+.public-evaluation-page .identity-box span {
+  color: #667085 !important;
+}
+
+.public-evaluation-page .questions-flow,
+.public-evaluation-page .start-block,
+.public-evaluation-page .completion-panel {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.public-evaluation-page .progress-card,
+.public-evaluation-page .question-card {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+}
+
+.public-evaluation-page .progress-card span,
+.public-evaluation-page .progress-card small,
+.public-evaluation-page .question-description {
+  color: #667085 !important;
+}
+
+.public-evaluation-page .progress-card strong,
+.public-evaluation-page .question-module h2,
+.public-evaluation-page .question-title {
+  color: #101828 !important;
+}
+
+.public-evaluation-page .progress-track {
+  background: #e5e7eb !important;
+}
+
+.public-evaluation-page .progress-track span {
+  background: linear-gradient(90deg, #16bfe8, #1877ff) !important;
+}
+
+.public-evaluation-page .module-heading span {
+  color: #1877ff !important;
+}
+
+.public-evaluation-page .question-instructions,
+.public-evaluation-page .spreadsheet-help {
+  background: #e6f9ff !important;
+  border: 1px solid #b9e9f5 !important;
+  color: #075985 !important;
+}
+
+.public-evaluation-page .option-row {
+  background: #f9fafb !important;
+  border: 1px solid #e5e7eb !important;
+  color: #101828 !important;
+}
+
+.public-evaluation-page .option-row:hover {
+  background: #f1f7ff !important;
+  border-color: #9ed9ff !important;
+}
+
+.public-evaluation-page .audio-recorder {
+  background: #f8fafc !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.public-evaluation-page .primary-button {
+  background: linear-gradient(135deg, #16bfe8 0%, #1877ff 100%) !important;
+  color: #ffffff !important;
+}
+
+.public-evaluation-page .secondary-button {
+  background: #ffffff !important;
+  border: 1px solid #d0d5dd !important;
+  color: #344054 !important;
+}

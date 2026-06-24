@@ -134,8 +134,8 @@ export default function EvaluationPublic() {
 
   if (state.error && !state.started) {
     return (
-      <main className="evaluation-page">
-        <section className="evaluation-panel completion-panel">
+      <main className="evaluation-page public-evaluation-page">
+        <section className="evaluation-panel public-evaluation-panel completion-panel">
           <Logo size="md" showText={false} />
           <h1>No es posible iniciar la evaluación</h1>
           <p className="alert error">{state.error}</p>
@@ -147,10 +147,10 @@ export default function EvaluationPublic() {
   const evaluado = state.assignment.evaluados;
 
   return (
-    <main className="evaluation-page">
-      <section className="evaluation-panel">
-        <div className="evaluation-header">
-          <div>
+    <main className="evaluation-page public-evaluation-page">
+      <section className="evaluation-panel public-evaluation-panel">
+        <div className="evaluation-header public-evaluation-header">
+          <div className="evaluation-brand-block">
             <Logo size="md" showText={false} />
             <span className="eyebrow">Evaluación pública</span>
             <h1>ScanerIA</h1>
