@@ -17,3 +17,15 @@ alter table public.evaluation_responses add column if not exists review_observat
 alter table public.evaluation_responses add column if not exists improvement_opportunity text;
 alter table public.evaluation_responses add column if not exists review_status text;
 alter table public.evaluation_responses add column if not exists reviewed_at timestamp with time zone;
+alter table public.evaluation_responses add column if not exists ai_percentage numeric;
+alter table public.evaluation_responses add column if not exists ai_status text;
+alter table public.evaluation_responses add column if not exists ai_observation text;
+alter table public.evaluation_responses add column if not exists ai_improvement_opportunity text;
+alter table public.evaluation_responses add column if not exists ai_confidence numeric;
+alter table public.evaluation_responses add column if not exists final_percentage numeric;
+alter table public.evaluation_responses add column if not exists review_type text;
+
+alter table public.resultados add column if not exists ai_score numeric;
+alter table public.resultados add column if not exists ai_strengths jsonb;
+alter table public.resultados add column if not exists ai_improvement_areas jsonb;
+alter table public.resultados add column if not exists ai_final_recommendation text;

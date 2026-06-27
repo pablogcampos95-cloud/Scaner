@@ -14,6 +14,9 @@ export const REVIEW_LABELS = {
   [REVIEW_STATUS.AI]: 'Revisado con IA',
   [REVIEW_STATUS.FINAL]: 'Resultado final',
   [REVIEW_STATUS.COMPLETE]: 'Resultado final',
+  reviewed: 'Revisado con IA',
+  revisado: 'Resultado final',
+  manual_reviewed: 'Revisado manualmente',
 };
 
 export const MANUAL_REVIEW_TYPES = new Set([

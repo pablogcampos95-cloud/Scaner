@@ -4,7 +4,7 @@ import DataTable from '../components/DataTable.jsx';
 import Logo from '../components/Logo.jsx';
 import ResponseAnswerView from '../components/ResponseAnswerView.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
-import { generateResultSuggestion } from '../services/aiService.js';
+import { generateResultSuggestion, reviewEvaluationWithAi } from '../services/aiService.js';
 import { getResponsesByAsignacion } from '../services/respuestasService.js';
 import { getResultadoById, listResultados } from '../services/resultadosService.js';
 import { getAudioSignedUrl } from '../services/storageService.js';
@@ -13,28 +13,31 @@ import { formatDateTime, formatPercent } from '../utils/formatters.js';
 import { getReviewLabel, getReviewSummary, isResultPendingReview } from '../utils/reviewStatus.js';
 import { getLevelByScore } from '../utils/scoreCalculator.js';
 
+async function loadResultDetail(resultId, profile) {
+  const selected = await getResultadoById(resultId, profile);
+  const rawResponses = selected ? await getResponsesByAsignacion(selected.asignacion_id) : [];
+  const responses = await Promise.all(rawResponses.map(async (response) => ({
+    ...response,
+    playableAudioUrl: response.audio_path ? await getAudioSignedUrl(response.audio_path) : response.audio_url,
+  })));
+  return { rows: [], selected, responses };
+}
+
 export default function Results() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiError: '', aiProvider: '', aiWarning: '' });
+  const [state, setState] = useState({ rows: [], selected: null, responses: [], loading: true, error: '', aiLoading: false, aiReviewLoading: false, aiError: '', aiReviewError: '', aiReviewMessage: '', aiProvider: '', aiWarning: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ fecha: '', area: '', perfil: '', estado: '', resultado: '' });
 
   useEffect(() => {
     const loader = id
-      ? getResultadoById(id, profile).then(async (selected) => {
-          const rawResponses = selected ? await getResponsesByAsignacion(selected.asignacion_id) : [];
-          const responses = await Promise.all(rawResponses.map(async (response) => ({
-            ...response,
-            playableAudioUrl: response.audio_path ? await getAudioSignedUrl(response.audio_path) : response.audio_url,
-          })));
-          return { rows: [], selected, responses };
-        })
+      ? loadResultDetail(id, profile)
       : listResultados(profile).then((rows) => ({ rows, selected: null, responses: [] }));
 
     loader
-      .then((payload) => setState({ ...payload, loading: false, error: '', aiLoading: false, aiError: '', aiProvider: '', aiWarning: '' }))
-      .catch((error) => setState({ rows: [], selected: null, responses: [], loading: false, error: error.message, aiLoading: false, aiError: '', aiProvider: '', aiWarning: '' }));
+      .then((payload) => setState({ ...payload, loading: false, error: '', aiLoading: false, aiReviewLoading: false, aiError: '', aiReviewError: '', aiReviewMessage: '', aiProvider: '', aiWarning: '' }))
+      .catch((error) => setState({ rows: [], selected: null, responses: [], loading: false, error: error.message, aiLoading: false, aiReviewLoading: false, aiError: '', aiReviewError: '', aiReviewMessage: '', aiProvider: '', aiWarning: '' }));
   }, [id, profile]);
 
   const handleGenerateSuggestion = async (force = false) => {
@@ -55,6 +58,33 @@ export default function Results() {
       }));
     } catch (error) {
       setState((prev) => ({ ...prev, aiLoading: false, aiError: error.message, aiWarning: '' }));
+    }
+  };
+
+  const handleAiReview = async () => {
+    if (!state.selected?.id) return;
+    setState((prev) => ({
+      ...prev,
+      aiReviewLoading: true,
+      aiReviewError: '',
+      aiReviewMessage: '',
+    }));
+    try {
+      await reviewEvaluationWithAi(state.selected.id);
+      const refreshed = await loadResultDetail(state.selected.id, profile);
+      setState((prev) => ({
+        ...prev,
+        ...refreshed,
+        aiReviewLoading: false,
+        aiReviewError: '',
+        aiReviewMessage: 'Evaluación revisada con IA correctamente.',
+      }));
+    } catch (error) {
+      setState((prev) => ({
+        ...prev,
+        aiReviewLoading: false,
+        aiReviewError: error.message || 'No se pudo completar la revisión con IA. Intente nuevamente o revise la configuración.',
+      }));
     }
   };
 
@@ -133,10 +163,12 @@ export default function Results() {
                 Revisar manualmente
               </Link>
             ) : null}
-            <button className="secondary-button compact" type="button" onClick={() => handleGenerateSuggestion(true)} disabled={state.aiLoading}>
-              {state.aiLoading ? 'Analizando...' : 'Revisar con IA'}
+            <button className="secondary-button compact" type="button" onClick={handleAiReview} disabled={state.aiReviewLoading}>
+              {state.aiReviewLoading ? 'Revisando evaluación con IA...' : 'Revisar con IA'}
             </button>
           </div>
+          {state.aiReviewMessage ? <p className="alert success">{state.aiReviewMessage}</p> : null}
+          {state.aiReviewError ? <p className="alert error">{state.aiReviewError}</p> : null}
         </section>
 
         <div className="module-grid">
