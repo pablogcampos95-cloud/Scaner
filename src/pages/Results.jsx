@@ -10,6 +10,7 @@ import { getResultadoById, listResultados } from '../services/resultadosService.
 import { getAudioSignedUrl } from '../services/storageService.js';
 import { MODULES } from '../utils/constants.js';
 import { formatDateTime, formatPercent } from '../utils/formatters.js';
+import { getReviewLabel, getReviewSummary, isResultPendingReview } from '../utils/reviewStatus.js';
 import { getLevelByScore } from '../utils/scoreCalculator.js';
 
 export default function Results() {
@@ -75,6 +76,8 @@ export default function Results() {
       unidad: result.evaluados?.unidad || result.evaluados?.campana || 'No definida',
     };
     const averageTone = getScoreTone(result.promedio_general);
+    const reviewSummary = getReviewSummary(result, state.responses);
+    const displayedResult = reviewSummary.isPending ? reviewSummary.status : result.resultado_final;
     return (
       <section className="page-stack detail-page">
         <div className="result-hero">
@@ -84,7 +87,7 @@ export default function Results() {
             <h1>{result.evaluados?.nombre_completo || 'Evaluado'}</h1>
             <p>Evaluación de competencias operativas, comerciales y digitales.</p>
           </div>
-          <ResultBadge result={result.resultado_final} />
+          <ResultBadge result={displayedResult} />
         </div>
 
         <div className="result-summary">
@@ -94,14 +97,47 @@ export default function Results() {
             <small>{postulacion.perfil} · {postulacion.area} · {postulacion.unidad}</small>
           </div>
           <div>
-            <span>Promedio general</span>
+            <span>{reviewSummary.isPending ? 'Promedio parcial' : 'Promedio final'}</span>
             <strong className={`score-value score-value--${averageTone}`}>{formatPercent(result.promedio_general)}</strong>
+            {reviewSummary.isPending ? <small>Resultado no definitivo</small> : null}
           </div>
           <div className="result-summary-date">
             <span>Finalización</span>
             <strong>{formatDateTime(result.created_at)}</strong>
           </div>
         </div>
+
+        <section className="plain-section review-status-panel">
+          <div className="review-status-header">
+            <div>
+              <span className="eyebrow">Estado de revisión</span>
+              <h2>{reviewSummary.status}</h2>
+              <p>
+                {reviewSummary.isPending
+                  ? 'El resultado mostrado es preliminar. Aún existen respuestas abiertas que requieren validación.'
+                  : 'La evaluación ya no tiene preguntas pendientes de revisión.'}
+              </p>
+            </div>
+            <ResultBadge result={reviewSummary.status} />
+          </div>
+          <div className="review-metrics">
+            <span><strong>{reviewSummary.automaticCount}</strong> revisadas automáticamente</span>
+            <span><strong>{reviewSummary.pendingCount}</strong> pendientes</span>
+            <span><strong>{reviewSummary.pendingSpreadsheet}</strong> Excel pendientes</span>
+            <span><strong>{reviewSummary.pendingAudio}</strong> audio pendientes</span>
+            <span><strong>{reviewSummary.pendingText}</strong> texto pendientes</span>
+          </div>
+          <div className="review-actions">
+            {reviewSummary.pendingCount > 0 ? (
+              <Link className="primary-button compact" to={`/resultados/${result.asignacion_id}/revision`}>
+                Revisar manualmente
+              </Link>
+            ) : null}
+            <button className="secondary-button compact" type="button" onClick={() => handleGenerateSuggestion(true)} disabled={state.aiLoading}>
+              {state.aiLoading ? 'Analizando...' : 'Revisar con IA'}
+            </button>
+          </div>
+        </section>
 
         <div className="module-grid">
           {MODULES.map((module) => {
@@ -136,11 +172,6 @@ export default function Results() {
               {state.aiLoading ? 'Generando...' : result.ai_suggestion ? 'Regenerar sugerencia IA' : 'Generar sugerencia IA'}
             </button>
           </div>
-          {state.responses.length ? (
-            <Link className="primary-button compact" to={`/resultados/${result.asignacion_id}/revision`}>
-              Revisar / ajustar respuestas
-            </Link>
-          ) : null}
           <Link className="secondary-button compact" to={profile.role === 'admin' ? '/admin' : '/supervisor'}>
             Volver al dashboard
           </Link>
@@ -170,12 +201,12 @@ export default function Results() {
   const columns = [
     { key: 'evaluado', header: 'Evaluado', render: (row) => row.evaluados?.nombre_completo || '-' },
     { key: 'campana', header: 'Campaña', render: (row) => row.evaluados?.campana || '-' },
-    { key: 'pc', header: 'PC', render: (row) => <ScoreText score={row.puntaje_pc} /> },
-    { key: 'excel', header: 'Excel', render: (row) => <ScoreText score={row.puntaje_excel} /> },
-    { key: 'etica', header: 'Ética', render: (row) => <ScoreText score={row.puntaje_etica} /> },
-    { key: 'kpis', header: 'KPIs', render: (row) => <ScoreText score={row.puntaje_kpis} /> },
-    { key: 'promedio_general', header: 'Promedio', render: (row) => <ScoreText score={row.promedio_general} /> },
-    { key: 'resultado_final', header: 'Resultado', render: (row) => <ResultBadge result={row.resultado_final} /> },
+    { key: 'pc', header: 'PC', render: (row) => <ScoreText score={row.puntaje_pc} pending={shouldShowPendingScore(row, 'puntaje_pc')} /> },
+    { key: 'excel', header: 'Excel', render: (row) => <ScoreText score={row.puntaje_excel} pending={shouldShowPendingScore(row, 'puntaje_excel')} /> },
+    { key: 'etica', header: 'Ética', render: (row) => <ScoreText score={row.puntaje_etica} pending={shouldShowPendingScore(row, 'puntaje_etica')} /> },
+    { key: 'kpis', header: 'KPIs', render: (row) => <ScoreText score={row.puntaje_kpis} pending={shouldShowPendingScore(row, 'puntaje_kpis')} /> },
+    { key: 'promedio_general', header: 'Promedio', render: (row) => <AverageText row={row} /> },
+    { key: 'resultado_final', header: 'Resultado', render: (row) => <ResultBadge result={getReviewLabel(row)} /> },
     { key: 'created_at', header: 'Finalización', render: (row) => formatDateTime(row.created_at) },
     { key: 'acciones', header: 'Acciones', render: (row) => <div className="table-actions"><Link to={`/resultados/${row.id}`}>Ver informe</Link></div> },
   ];
@@ -190,13 +221,13 @@ export default function Results() {
       (!filters.area || area === filters.area) &&
       (!filters.perfil || perfil === filters.perfil) &&
       (!filters.estado || estado === filters.estado) &&
-      (!filters.resultado || row.resultado_final === filters.resultado)
+      (!filters.resultado || getReviewLabel(row) === filters.resultado || row.resultado_final === filters.resultado)
     );
   });
 
   const areas = [...new Set(state.rows.map((row) => row.evaluados?.areas?.nombre).filter(Boolean))];
   const perfiles = [...new Set(state.rows.map((row) => row.evaluados?.perfiles_operativos?.nombre).filter(Boolean))];
-  const resultados = [...new Set(state.rows.map((row) => row.resultado_final).filter(Boolean))];
+  const resultados = [...new Set(state.rows.map((row) => getReviewLabel(row)).filter(Boolean))];
 
   return (
     <section className="page-stack">
@@ -243,9 +274,22 @@ export default function Results() {
   );
 }
 
-function ScoreText({ score }) {
+function ScoreText({ score, pending = false }) {
+  if (pending) return <span className="score-pill-text score-value--pending">Pendiente</span>;
   const tone = getScoreTone(score);
   return <span className={`score-pill-text score-value--${tone}`}>{formatPercent(score)}</span>;
+}
+
+function AverageText({ row }) {
+  const tone = getScoreTone(row.promedio_general);
+  if (isResultPendingReview(row)) {
+    return <span className={`score-pill-text score-value--partial score-value--${tone}`}>{formatPercent(row.promedio_general)} parcial</span>;
+  }
+  return <span className={`score-pill-text score-value--${tone}`}>{formatPercent(row.promedio_general)}</span>;
+}
+
+function shouldShowPendingScore(row, field) {
+  return isResultPendingReview(row) && Number(row?.[field] || 0) === 0;
 }
 
 function getScoreTone(score) {

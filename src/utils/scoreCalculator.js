@@ -1,5 +1,5 @@
-import { MODULES, RESULT_LABELS } from './constants.js';
-import { gradeSpreadsheetAnswer } from './spreadsheetGrader.js';
+import { MODULES } from './constants.js';
+import { getFinalResultLabel } from './reviewStatus.js';
 
 export function getLevelByScore(score) {
   if (score < 60) return 'Básico / Requiere refuerzo';
@@ -8,9 +8,7 @@ export function getLevelByScore(score) {
 }
 
 export function getFinalResult(average) {
-  if (average < 60) return RESULT_LABELS.NO_APTO;
-  if (average < 80) return RESULT_LABELS.APTO_REFUERZO;
-  return RESULT_LABELS.APTO;
+  return getFinalResultLabel(average);
 }
 
 export function buildDiagnostic(scores) {
@@ -98,11 +96,7 @@ export function calculateQuestionScore(question, answer) {
   }
 
   if (type === 'short_text') {
-    const text = String(answer || '').trim().toLowerCase();
-    const keywords = correctAnswer?.keywords || settings.keywords || [];
-    if (!keywords.length) return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
-    const isCorrect = keywords.every((keyword) => text.includes(String(keyword).toLowerCase()));
-    return { scoreObtained: isCorrect ? maxScore : 0, maxScore, isCorrect, requiresReview: false };
+    return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
   }
 
   if (type === 'long_text' || type === 'audio_response') {
@@ -110,13 +104,7 @@ export function calculateQuestionScore(question, answer) {
   }
 
   if (type === 'spreadsheet') {
-    const grading = gradeSpreadsheetAnswer(settings, correctAnswer, answer, maxScore);
-    return {
-      scoreObtained: grading.scoreObtained,
-      maxScore: grading.maxScore,
-      isCorrect: grading.isCorrect,
-      requiresReview: grading.requiresReview,
-    };
+    return { scoreObtained: 0, maxScore, isCorrect: null, requiresReview: true };
   }
 
   if (type === 'kpi_numeric') {

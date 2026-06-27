@@ -4,11 +4,23 @@ import ResponseAnswerView from '../components/ResponseAnswerView.jsx';
 import ResultBadge from '../components/ResultBadge.jsx';
 import { getResponsesByAsignacion, saveManualReview } from '../services/respuestasService.js';
 import { getAudioSignedUrl } from '../services/storageService.js';
+import { canEditManualReview } from '../utils/reviewStatus.js';
 
 export default function ManualReview() {
   const { profile } = useOutletContext();
   const { id } = useParams();
-  const [state, setState] = useState({ responses: [], loading: true, error: '', message: '', scores: {}, comments: {}, savingId: '' });
+  const [state, setState] = useState({
+    responses: [],
+    loading: true,
+    error: '',
+    message: '',
+    scores: {},
+    statuses: {},
+    comments: {},
+    improvements: {},
+    internalComments: {},
+    savingId: '',
+  });
 
   const load = () => {
     getResponsesByAsignacion(id)
@@ -18,8 +30,11 @@ export default function ManualReview() {
           playableAudioUrl: response.audio_path ? await getAudioSignedUrl(response.audio_path) : response.audio_url,
         })));
         const scores = Object.fromEntries(decorated.map((response) => [response.id, response.score_obtained ?? 0]));
+        const statuses = Object.fromEntries(decorated.map((response) => [response.id, 'cumple']));
         const comments = Object.fromEntries(decorated.map((response) => [response.id, response.review_comment || '']));
-        setState((prev) => ({ ...prev, responses: decorated, scores, comments, loading: false, error: '' }));
+        const improvements = Object.fromEntries(decorated.map((response) => [response.id, '']));
+        const internalComments = Object.fromEntries(decorated.map((response) => [response.id, '']));
+        setState((prev) => ({ ...prev, responses: decorated, scores, statuses, comments, improvements, internalComments, loading: false, error: '' }));
       })
       .catch((error) => setState((prev) => ({ ...prev, loading: false, error: error.message })));
   };
@@ -34,7 +49,13 @@ export default function ManualReview() {
         reviewerId: profile.id,
         score: state.scores[response.id] ?? 0,
         comment: state.comments[response.id] || '',
-        rubricResult: { source: 'manual_review' },
+        rubricResult: {
+          source: 'manual_review',
+          status: state.statuses[response.id] || 'cumple',
+          observation: state.comments[response.id] || '',
+          improvement: state.improvements[response.id] || '',
+          internal_comment: state.internalComments[response.id] || '',
+        },
       });
       setState((prev) => ({ ...prev, savingId: '', message: 'Revisión guardada y resultado recalculado.' }));
       load();
@@ -49,7 +70,7 @@ export default function ManualReview() {
         <div>
           <span className="eyebrow">Validación de respuestas</span>
           <h1>Revisar evaluación</h1>
-          <p>Valida, ajusta puntajes y registra comentarios para cada respuesta del evaluado.</p>
+          <p>Valida solo las respuestas abiertas, de audio o Excel que requieren criterio del revisor.</p>
         </div>
         <Link className="secondary-button compact" to={`/resultados/${id}`}>
           Volver al informe
@@ -60,52 +81,101 @@ export default function ManualReview() {
       {state.message ? <p className="alert success">{state.message}</p> : null}
 
       <div className="responses-list review-list">
-        {state.responses.map((response, index) => (
-          <article className="response-card review-card" key={response.id}>
-            <div className="review-card-header">
-              <div>
-                <span className="eyebrow">Pregunta {index + 1}</span>
-                <h2>{response.questions?.titulo || 'Pregunta'}</h2>
+        {state.responses.map((response, index) => {
+          const editable = canEditManualReview(response);
+          return (
+            <article className="response-card review-card" key={response.id}>
+              <div className="review-card-header">
+                <div>
+                  <span className="eyebrow">Pregunta {index + 1}</span>
+                  <h2>{response.questions?.titulo || 'Pregunta'}</h2>
+                </div>
+                <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
               </div>
-              <ResultBadge result={response.requires_review ? 'Pendiente de revisión' : response.is_correct ? 'Apto' : 'No apto temporal'} />
-            </div>
 
-            <ResponseAnswerView response={response} />
+              <ResponseAnswerView response={response} />
 
-            <div className="review-form">
-              <label>
-                Puntaje obtenido
-                <input
-                  type="number"
-                  min="0"
-                  max={Number(response.max_score || 0)}
-                  step="0.1"
-                  value={state.scores[response.id] ?? ''}
-                  onChange={(event) => setState((prev) => ({
-                    ...prev,
-                    scores: { ...prev.scores, [response.id]: event.target.value },
-                  }))}
-                />
-                <small>Máximo: {response.max_score ?? 0}</small>
-              </label>
-              <label>
-                Comentario de validación
-                <textarea
-                  rows="3"
-                  value={state.comments[response.id] || ''}
-                  onChange={(event) => setState((prev) => ({
-                    ...prev,
-                    comments: { ...prev.comments, [response.id]: event.target.value },
-                  }))}
-                  placeholder="Agrega una observación breve para sustentar el ajuste."
-                />
-              </label>
-              <button className="primary-button compact" type="button" onClick={() => save(response)} disabled={state.savingId === response.id}>
-                {state.savingId === response.id ? 'Guardando...' : 'Guardar validación'}
-              </button>
-            </div>
-          </article>
-        ))}
+              {!editable ? (
+                <div className="review-readonly-note">
+                  <strong>Corrección automática</strong>
+                  <span>Esta pregunta ya fue corregida de forma objetiva y queda en modo lectura.</span>
+                </div>
+              ) : (
+                <div className="review-form review-form--extended">
+                  <label>
+                    Puntaje asignado
+                    <input
+                      type="number"
+                      min="0"
+                      max={Number(response.max_score || 0)}
+                      step="0.1"
+                      value={state.scores[response.id] ?? ''}
+                      onChange={(event) => setState((prev) => ({
+                        ...prev,
+                        scores: { ...prev.scores, [response.id]: event.target.value },
+                      }))}
+                    />
+                    <small>Máximo: {response.max_score ?? 0}</small>
+                  </label>
+                  <label>
+                    Estado
+                    <select
+                      value={state.statuses[response.id] || 'cumple'}
+                      onChange={(event) => setState((prev) => ({
+                        ...prev,
+                        statuses: { ...prev.statuses, [response.id]: event.target.value },
+                      }))}
+                    >
+                      <option value="cumple">Cumple</option>
+                      <option value="parcial">Parcial</option>
+                      <option value="no_cumple">No cumple</option>
+                      <option value="no_aplica">No aplica</option>
+                    </select>
+                  </label>
+                  <label>
+                    Observación del revisor
+                    <textarea
+                      rows="3"
+                      value={state.comments[response.id] || ''}
+                      onChange={(event) => setState((prev) => ({
+                        ...prev,
+                        comments: { ...prev.comments, [response.id]: event.target.value },
+                      }))}
+                      placeholder="Agrega una observación breve para sustentar el ajuste."
+                    />
+                  </label>
+                  <label>
+                    Oportunidad de mejora
+                    <textarea
+                      rows="3"
+                      value={state.improvements[response.id] || ''}
+                      onChange={(event) => setState((prev) => ({
+                        ...prev,
+                        improvements: { ...prev.improvements, [response.id]: event.target.value },
+                      }))}
+                      placeholder="Describe la acción de mejora sugerida."
+                    />
+                  </label>
+                  <label>
+                    Comentario interno
+                    <textarea
+                      rows="3"
+                      value={state.internalComments[response.id] || ''}
+                      onChange={(event) => setState((prev) => ({
+                        ...prev,
+                        internalComments: { ...prev.internalComments, [response.id]: event.target.value },
+                      }))}
+                      placeholder="Nota interna para seguimiento."
+                    />
+                  </label>
+                  <button className="primary-button compact" type="button" onClick={() => save(response)} disabled={state.savingId === response.id}>
+                    {state.savingId === response.id ? 'Guardando...' : 'Guardar revisión'}
+                  </button>
+                </div>
+              )}
+            </article>
+          );
+        })}
       </div>
 
       {!state.loading && state.responses.length === 0 ? <p className="alert success">No hay respuestas registradas para esta asignación.</p> : null}

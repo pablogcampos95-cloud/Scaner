@@ -76,10 +76,10 @@ export async function saveSpreadsheetResponse({ asignacionId, questionId, evalua
     evaluado_id: evaluadoId,
     answer_type: 'spreadsheet',
     answer_json: { ...answerJson, grading },
-    is_correct: grading.isCorrect,
-    score_obtained: grading.scoreObtained,
+    is_correct: null,
+    score_obtained: 0,
     max_score: grading.maxScore,
-    requires_review: grading.requiresReview,
+    requires_review: true,
   });
 }
 
@@ -126,10 +126,10 @@ export async function saveDynamicEvaluationResponses({ token, assignment, evalua
       responses.push({
         ...base,
         answer_json: { ...answer, grading },
-        is_correct: grading.isCorrect,
-        score_obtained: grading.scoreObtained,
+        is_correct: null,
+        score_obtained: 0,
         max_score: grading.maxScore,
-        requires_review: grading.requiresReview,
+        requires_review: true,
       });
     } else if (['multiple_choice', 'kpi_numeric'].includes(question.question_type)) {
       responses.push({ ...base, answer_json: answer });
@@ -264,6 +264,17 @@ export async function saveManualReview({ responseId, reviewerId, score, comment,
     return data;
   }
 
-  updateLocal('evaluation_responses', responseId, { score_obtained: Number(score || 0), requires_review: false, reviewed_by: reviewerId, review_comment: comment || '' });
+  updateLocal('evaluation_responses', responseId, {
+    score_obtained: Number(score || 0),
+    manual_score: Number(score || 0),
+    final_score: Number(score || 0),
+    requires_review: false,
+    reviewed_by: reviewerId,
+    reviewed_at: new Date().toISOString(),
+    review_comment: comment || '',
+    review_observation: comment || '',
+    improvement_opportunity: rubricResult?.improvement || '',
+    review_status: rubricResult?.status || 'cumple',
+  });
   return insertLocal('manual_reviews', reviewPayload);
 }

@@ -81,10 +81,16 @@ begin
 
   update public.evaluation_responses
   set score_obtained = v_score,
+      manual_score = v_score,
+      final_score = v_score,
       requires_review = false,
       is_correct = v_is_correct,
       reviewed_by = v_reviewer,
       review_comment = coalesce(p_comment, ''),
+      review_observation = coalesce(p_comment, ''),
+      improvement_opportunity = coalesce(p_rubric_result->>'improvement', ''),
+      review_status = coalesce(p_rubric_result->>'status', 'cumple'),
+      reviewed_at = now(),
       updated_at = now()
   where id = p_response_id;
 
@@ -103,6 +109,7 @@ begin
 
   v_result_label := case
     when v_pending > 0 then 'Pendiente de revisión'
+    when v_percentage < 40 then 'No apto'
     when v_percentage < 60 then 'No apto temporal'
     when v_percentage < 80 then 'Apto con refuerzo'
     else 'Apto'
@@ -111,10 +118,18 @@ begin
   update public.resultados
   set promedio_general = v_percentage,
       resultado_final = v_result_label,
-      estado_resultado = case when v_pending > 0 then 'pendiente_revision' else 'completo' end,
+      estado_resultado = case when v_pending > 0 then 'pendiente_revision' else 'revisado_manual' end,
+      review_status = case when v_pending > 0 then 'pendiente_revision' else 'revisado_manual' end,
+      review_type = 'manual',
+      reviewed_by = v_reviewer,
+      reviewed_at = now(),
       score_obtained = v_total_score,
       max_score = v_total_max,
-      pending_reviews = v_pending
+      pending_reviews = v_pending,
+      pending_review_count = v_pending,
+      has_pending_review = v_pending > 0,
+      manual_score = v_total_score,
+      final_score = v_percentage
   where asignacion_id = v_response.asignacion_id;
 
   return jsonb_build_object(
